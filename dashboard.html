@@ -71,6 +71,7 @@
                     <h4 id="userNameDisplay">Usuário</h4>
                     <p id="userRoleDisplay">Permissionário</p>
                 </div>
+                <button class="logout-btn" title="Alterar Senha" onclick="abrirModalSenhaDashboard()" style="color:var(--primary); margin-right:5px;"><i class="ri-lock-password-line"></i></button>
                 <button id="logoutBtn" class="logout-btn" title="Sair"><i class="ri-logout-box-r-line"></i></button>
             </div>
         </aside>
@@ -821,6 +822,21 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="script.js"></script>
+
+    <!-- Modal Alterar Senha Dashboard -->
+    <div id="modalSenhaDashboard" class="modal-overlay" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+        <div class="modal-content glass-panel" style="max-width: 400px; text-align: center; padding: 25px; border-radius: 12px; background: rgba(255,255,255,0.95); position:relative;">
+            <button onclick="fecharModalSenhaDashboard()" style="position:absolute; top: 10px; right: 15px; background: transparent; border:none; font-size:1.2rem; cursor:pointer;"><i class="ri-close-line"></i></button>
+            <h3 style="color: var(--primary-color); margin-bottom: 10px;"><i class="ri-lock-password-line"></i> Alterar Senha</h3>
+            <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;">Insira sua nova senha abaixo. Ela substituirá a senha atual imediatamente.</p>
+            <div class="input-group">
+                <i class="ri-lock-line" style="position: absolute; left: 35px; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+                <input type="password" id="novaSenhaInputDash" placeholder="Nova Senha (min 6 caracteres)" style="width: 100%; padding: 12px 15px 12px 40px; border-radius: 8px; border: 1px solid var(--glass-border); margin-bottom: 15px;" required>
+            </div>
+            <button id="btnConfirmaNovaSenha" class="btn btn-primary" onclick="confirmarMudarSenhaDashboard()" style="width: 100%; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none;">Salvar Modificação</button>
+        </div>
+    </div>
+    
 </body>
 
 </html>

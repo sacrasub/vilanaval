@@ -1,21 +1,92 @@
+// SUPABASE INITIALIZATION
+const supabaseUrl = 'https://jzvoxaqhteqdfyurjlbk.supabase.co';
+const supabaseKey = 'sb_publishable_hKgmUqtu7Wrfo1A5z0fiUg_xy4pLT9H';
+window._supabase = window.supabase ? window.supabase.createClient(supabaseUrl, supabaseKey) : null;
+
 ﻿document.addEventListener('DOMContentLoaded', () => {
-    // Basic Login Simulation
+    // Login com Supabase + Validação de Senha + NIP Masks
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
-        loginForm.addEventListener('submit', (e) => {
+        loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const username = document.getElementById('username').value.toLowerCase();
+            const nip = document.getElementById('nip').value.toLowerCase();
+            const senha = document.getElementById('senha').value;
+            const btn = loginForm.querySelector("button[type='submit']");
 
-            // Simple mock authentication
-            // username 'sindico' logins as admin
-            if (username.includes('sindico') || username.includes('admin')) {
+            btn.innerHTML = "Verificando...";
+            btn.disabled = true;
+
+            // Admin bypass
+            if (nip === 'sindico' || nip.includes('admin')) {
                 localStorage.setItem('vnt_role', 'sindico');
-            } else {
-                localStorage.setItem('vnt_role', 'permissionario');
+                localStorage.setItem('vnt_user', 'Síndico');
+                window.location.href = 'dashboard.html';
+                return;
             }
 
-            localStorage.setItem('vnt_user', username || 'Usuário');
-            window.location.href = 'dashboard.html';
+            // Validação Matemática do DV da Marinha antes de bater banco
+            if (!validarNIP(nip)) {
+                alert("NIP Inválido (Regra Módulo 11)! Verifique o Dígito Verificador inserido.");
+                btn.innerHTML = 'Acessar <i class="ri-arrow-right-line"></i>';
+                btn.disabled = false;
+                return;
+            }
+
+            // Supabase Check
+            if (window._supabase) {
+                const { data, error } = await window._supabase.from('moradores').select('*').eq('nip', nip);
+
+                if (data && data.length > 0) {
+                    const moradorData = data[0];
+                    const dados = moradorData.dados || {};
+                    const senhaBanco = dados.senha || 'marinha123';
+
+                    if (senha !== senhaBanco) {
+                        alert("Senha Incorreta!");
+                        btn.innerHTML = 'Acessar <i class="ri-arrow-right-line"></i>';
+                        btn.disabled = false;
+                        return;
+                    }
+
+                    if (senhaBanco === 'marinha123') {
+                        // FORÇA MUDANÇA DE SENHA
+                        const modal = document.getElementById('modalMudarSenha');
+                        if (modal) {
+                            modal.style.display = 'flex';
+                            document.getElementById('btnSalvarSenha').onclick = async () => {
+                                const novaSenha = document.getElementById('novaSenha').value;
+                                if (novaSenha.length < 6) {
+                                    alert("A senha deve ter no mínimo 6 caracteres para ser segura.");
+                                    return;
+                                }
+                                const btnSalvar = document.getElementById('btnSalvarSenha');
+                                btnSalvar.innerHTML = "Salvando...";
+                                btnSalvar.disabled = true;
+
+                                dados.senha = novaSenha;
+                                await window._supabase.from('moradores').update({ dados: dados }).eq('nip', nip);
+
+                                localStorage.setItem('vnt_role', nip);
+                                localStorage.setItem('vnt_user', nip);
+                                window.location.href = 'dashboard.html';
+                            };
+                        }
+                    } else {
+                        // Login normal se a senha não for a de fábrica
+                        localStorage.setItem('vnt_role', nip);
+                        localStorage.setItem('vnt_user', nip);
+                        window.location.href = 'dashboard.html';
+                    }
+                } else {
+                    alert("Acesso Negado! NIP não matriculado na Vila Naval. Solicite liberação na administração.");
+                    btn.innerHTML = 'Acessar <i class="ri-arrow-right-line"></i>';
+                    btn.disabled = false;
+                }
+            } else {
+                alert("Erro grave: Banco de Dados Inacessível.");
+                btn.innerHTML = 'Acessar <i class="ri-arrow-right-line"></i>';
+                btn.disabled = false;
+            }
         });
     }
 
@@ -28,10 +99,10 @@
 
         if (role === 'sindico') {
             document.getElementById('userRoleDisplay').textContent = 'Síndico(a)';
-                        // Show admin menu items
+            // Show admin menu items
             document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'flex');
             const navChamados = document.querySelector('[data-target="chamados"]');
-            if(navChamados) navChamados.style.display = 'none';
+            if (navChamados) navChamados.style.display = 'none';
 
             const lblMenuCadastro = document.getElementById('lblMenuCadastro');
             if (lblMenuCadastro) lblMenuCadastro.textContent = 'Cadastro dos Moradores';
@@ -175,7 +246,7 @@
                 } else if (targetId === 'admin-chamados' || targetId === 'chamados') {
                     renderChamados(targetId === 'admin-chamados');
                 } else if (targetId === 'admin-pnrs') {
-                    if (typeof renderMoradores === 'function') setTimeout(()=>renderMoradores(), 100);
+                    if (typeof renderMoradores === 'function') setTimeout(() => renderMoradores(), 100);
                 } else if (targetId === 'reservas') {
                     if (typeof initCalendar === 'function') {
                         setTimeout(initCalendar, 50);
@@ -425,7 +496,7 @@ function submitFormData(form) {
 
     // Also sync to Sindico table if we implement the render function
     if (typeof renderMoradores === 'function') {
-        setTimeout(()=>renderMoradores(), 100);
+        setTimeout(() => renderMoradores(), 100);
     }
 
     setTimeout(() => {
@@ -470,11 +541,11 @@ async function renderMoradores() {
 
     const pnrGrid = document.getElementById('pnrGridContainer');
     if (!pnrGrid) return;
-    
+
     let moradores = [];
-    if(_supabase) {
+    if (_supabase) {
         let { data } = await _supabase.from('moradores').select('dados');
-        if(data) moradores = data.map(d => d.dados);
+        if (data) moradores = data.map(d => d.dados);
     } else {
         moradores = JSON.parse(localStorage.getItem('vnt_moradores')) || [];
     }
@@ -668,7 +739,7 @@ if (formReserva) {
 }
 
 
-window.printSection = function(sectionId) {
+window.printSection = function (sectionId) {
     document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('print-active'));
     document.getElementById(sectionId).classList.add('print-active');
     window.print();
@@ -677,7 +748,7 @@ window.printSection = function(sectionId) {
     }, 1000);
 }
 
-window.shareNotice = function(title, text) {
+window.shareNotice = function (title, text) {
     if (navigator.share) {
         navigator.share({
             title: title || 'Aviso da Vila Naval',
@@ -690,17 +761,129 @@ window.shareNotice = function(title, text) {
 }
 
 
-window.uploadFotoPNR = function(nip, input) {
-    if(input.files && input.files[0]) {
-        if(input.files[0].size > 3000000) {
+window.uploadFotoPNR = function (nip, input) {
+    if (input.files && input.files[0]) {
+        if (input.files[0].size > 3000000) {
             alert('A imagem é muito grande. Escolha uma foto menor que 3MB.');
             return;
         }
         var reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = function (e) {
             localStorage.setItem('foto_' + nip, e.target.result);
-            setTimeout(()=>renderMoradores(), 100);
+            setTimeout(() => renderMoradores(), 100);
         };
         reader.readAsDataURL(input.files[0]);
+    }
+}
+
+// Global Input Mask for NIP (00.0000.00)
+document.addEventListener('input', function (e) {
+    if (e.target && e.target.id === 'nip') {
+        let val = e.target.value;
+
+        // Se a pessoa estiver digitando letras (ex: "sindico"), ignora a mascara de numeros
+        if (/[A-Za-z]/.test(val)) return;
+
+        // Aplica a mascara 00.0000.00
+        let numbers = val.replace(/\D/g, '');
+        if (numbers.length > 0) {
+            let x = numbers.match(/(\d{0,2})(\d{0,4})(\d{0,2})/);
+            if (x) {
+                e.target.value = !x[2] ? x[1] : x[1] + (x[2] ? '.' + x[2] : '') + (x[3] ? '.' + x[3] : '');
+            }
+        }
+    }
+});
+
+
+// Funcao para Validar NIP via Modulo 11 (Marinha do Brasil)
+function validarNIP(nipComMascara) {
+    let numbers = nipComMascara.replace(/\D/g, '');
+    if (numbers.length !== 8) return false;
+
+    let soma = 0;
+    let pesos = [8, 7, 6, 5, 4, 3, 2];
+    for (let i = 0; i < 7; i++) {
+        soma += parseInt(numbers[i]) * pesos[i];
+    }
+
+    let resto = soma % 11;
+    let dv = 11 - resto;
+    if (dv === 10 || dv === 11) {
+        dv = 0;
+    }
+
+    return dv === parseInt(numbers[7]);
+}
+
+
+// PASSWORD LOGIC
+window.abrirModalSenhaDashboard = function() {
+    const m = document.getElementById('modalSenhaDashboard');
+    if(m) m.style.display = 'flex';
+}
+window.fecharModalSenhaDashboard = function() {
+    const m = document.getElementById('modalSenhaDashboard');
+    if(m) m.style.display = 'none';
+}
+window.confirmarMudarSenhaDashboard = async function() {
+    const input = document.getElementById('novaSenhaInputDash');
+    const novaSenha = input.value;
+    if(novaSenha.length < 6) {
+        alert("A senha precisa ter pelo menos 6 caracteres.");
+        return;
+    }
+    const nip = localStorage.getItem('vnt_role');
+    if(nip === 'sindico') {
+        alert("O síndico master não pode mudar a senha por aqui nesta versão do MVP.");
+        fecharModalSenhaDashboard();
+        return;
+    }
+    
+    if(!window._supabase) {
+        alert("Falha de conexão com a Base de Dados. Tente novamente.");
+        return;
+    }
+    
+    document.getElementById('btnConfirmaNovaSenha').innerHTML = 'Salvando...';
+    try {
+        const { data, error } = await window._supabase.from('moradores').select('*').eq('nip', nip);
+        if(data && data.length > 0) {
+            let dados = data[0].dados || {};
+            dados.senha = novaSenha;
+            await window._supabase.from('moradores').update({ dados: dados }).eq('nip', nip);
+            alert("Senha alterada com sucesso!");
+            input.value = '';
+            fecharModalSenhaDashboard();
+        } else {
+            alert("Erro ao localizar seu registro no banco de dados.");
+        }
+    } catch(e) {
+        alert("Erro fatal ao salvar senha.");
+    }
+    document.getElementById('btnConfirmaNovaSenha').innerHTML = 'Salvar Modificação';
+}
+
+window.resetarSenhaMorador = async function(nipTarget, nome) {
+    const confirmacao = confirm(ATENÇÃO: Você tem certeza que deseja RESETAR a senha do morador  (NIP: ) para o padrão "marinha123"? Isso exigirá que ele crie uma nova senha no proximo acesso.);
+    if(!confirmacao) return;
+
+    if(!window._supabase) {
+        alert("Sistema Offline. Tente Novamente.");
+        return;
+    }
+    
+    try {
+        const { data, error } = await window._supabase.from('moradores').select('*').eq('nip', nipTarget);
+        if(data && data.length > 0) {
+            let dados = data[0].dados || {};
+            dados.senha = "marinha123";
+            await window._supabase.from('moradores').update({ dados: dados }).eq('nip', nipTarget);
+            alert("Sucesso! A senha de " + nome + " foi completamente restaurada para marinha123.");
+        } else {
+            alert("Morador não encontrado no banco.");
+        }
+    } catch (e) {
+        alert("Falha ao comunicar com o servidor.");
     }
 }
