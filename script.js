@@ -180,9 +180,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (adminView) {
                 // Populate Kanban
-                const novasCol = document.getElementById('kanbanNovas');
-                const andamentoCol = document.getElementById('kanbanAndamento');
-                const concluidasCol = document.getElementById('kanbanConcluidas');
+                const novasCol = document.getElementById('kb-abertos');
+                const andamentoCol = document.getElementById('kb-analise');
+                const concluidasCol = document.getElementById('kb-concluidos');
 
                 if (novasCol && andamentoCol && concluidasCol) {
                     novasCol.innerHTML = ''; andamentoCol.innerHTML = ''; concluidasCol.innerHTML = '';
@@ -620,7 +620,7 @@ async function renderMoradores() {
     pnrGrid.innerHTML = html;
 
     let btnOcupado = document.getElementById('badgeOcupado');
-    let btnVago = document.getElementById('badgeVago');
+    let btnVago = document.getElementById('badgeOcupado');
     if (btnOcupado) btnOcupado.innerText = 'Ocupado: ' + ocupadoCount;
     if (btnVago) btnVago.innerText = 'Vago (Taxa União): ' + vagoCount;
 }
