@@ -841,37 +841,44 @@ window.fecharModalSenhaDashboard = function () {
 }
 window.confirmarMudarSenhaDashboard = async function () {
     const input = document.getElementById('novaSenhaInputDash');
+    const inputConf = document.getElementById('novaSenhaInputDashConf');
     const novaSenha = input.value;
-    if (novaSenha.length < 6) {
+    const novaSenhaConf = inputConf ? inputConf.value : novaSenha;
+    
+    if(novaSenha.length < 6) {
         alert("A senha precisa ter pelo menos 6 caracteres.");
         return;
     }
-    const nip = localStorage.getItem('vnt_role');
-    if (nip === 'sindico') {
-        alert("O síndico master não pode mudar a senha por aqui nesta versão do MVP.");
-        fecharModalSenhaDashboard();
+    if (novaSenha !== novaSenhaConf) {
+        alert("As senhas não coincidem.");
         return;
     }
-
-    if (!window._supabase) {
+    
+    const nip = localStorage.getItem('vnt_role');
+    if(!window._supabase) {
         alert("Falha de conexão com a Base de Dados. Tente novamente.");
         return;
     }
-
+    
     document.getElementById('btnConfirmaNovaSenha').innerHTML = 'Salvando...';
     try {
         const { data, error } = await window._supabase.from('moradores').select('*').eq('nip', nip);
-        if (data && data.length > 0) {
+        if(data && data.length > 0) {
             let dados = data[0].dados || {};
             dados.senha = novaSenha;
             await window._supabase.from('moradores').update({ dados: dados }).eq('nip', nip);
             alert("Senha alterada com sucesso!");
-            input.value = '';
-            fecharModalSenhaDashboard();
+        } else if (nip === 'sindico') {
+            let mockData = { nome: 'Síndico', senha: novaSenha };
+            await window._supabase.from('moradores').insert([{ nip: 'sindico', dados: mockData }]);
+            alert("Senha do Síndico cadastrada com sucesso na base!");
         } else {
             alert("Erro ao localizar seu registro no banco de dados.");
         }
-    } catch (e) {
+        input.value = '';
+        if(inputConf) inputConf.value = '';
+        fecharModalSenhaDashboard();
+    } catch(e) {
         alert("Erro fatal ao salvar senha.");
     }
     document.getElementById('btnConfirmaNovaSenha').innerHTML = 'Salvar Modificação';
@@ -915,4 +922,248 @@ window.togglePwd = function(inputId, iconId) {
             icon.classList.add('ri-eye-line');
         }
     }
+}
+
+
+// CPF Globals
+document.addEventListener('input', function (e) {
+    if (e.target && e.target.id === 'cpf') {
+        let val = e.target.value.replace(/\D/g, '');
+        if (val.length > 11) val = val.slice(0, 11);
+        if (val.length > 0) {
+            val = val.replace(/(\d{3})(\d)/, '.');
+            val = val.replace(/(\d{3})(\d)/, '.');
+            val = val.replace(/(\d{3})(\d{1,2})$/, '-');
+        }
+        e.target.value = val;
+    }
+});
+
+function validarCPF(cpf) {
+    cpf = cpf.replace(/\D/g, '');
+    if(cpf === '') return false;
+    if(cpf.length !== 11) return false;
+    if(/^(\d){10}$/.test(cpf)) return false;
+    
+    let soma = 0;
+    let resto;
+    for(let i=1; i<=9; i++) soma = soma + parseInt(cpf.substring(i-1, i)) * (11 - i);
+    resto = (soma * 10) % 11;
+    if(resto === 10 || resto === 11) resto = 0;
+    if(resto !== parseInt(cpf.substring(9, 10))) return false;
+    
+    soma = 0;
+    for(let i=1; i<=10; i++) soma = soma + parseInt(cpf.substring(i-1, i)) * (12 - i);
+    resto = (soma * 10) % 11;
+    if(resto === 10 || resto === 11) resto = 0;
+    if(resto !== parseInt(cpf.substring(10, 11))) return false;
+    return true;
+}
+
+// Sindico Add Novo Morador
+window.salvarMoradorSindico = async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnSalvarSindico');
+    const nip = document.getElementById('novoMoradorNip').value.toLowerCase();
+    const nome = document.getElementById('novoMoradorNome').value;
+    const endereco = document.getElementById('novoMoradorEndereco').value;
+    
+    if(!validarNIP(nip)) {
+        alert("NIP Inválido!"); return;
+    }
+    
+    if(!window._supabase) { alert("BD Offline"); return; }
+    
+    btn.innerHTML = 'Salvando...';
+    try {
+        let mockData = {
+            nomeCompleto: nome,
+            nip: nip,
+            endereco: endereco,
+            senha: 'marinha123',
+            posto: 'N/A'
+        };
+        const {data, error} = await window._supabase.from('moradores').select('id').eq('nip', nip);
+        if(data && data.length > 0) {
+            alert("Este NIP já existe!");
+        } else {
+            // insert
+            await window._supabase.from('moradores').insert([{ nip: nip, dados: mockData }]);
+            alert("Morador cadastrado com sucesso! Acesso liberado.");
+            document.getElementById('formNovoMoradorSindico').reset();
+            document.getElementById('modalNovoMorador').style.display = 'none';
+            if(typeof renderMoradores === 'function') renderMoradores();
+        }
+    } catch(err) {
+        alert("Erro no servidor.");
+    }
+    btn.innerHTML = 'Salvar';
+}
+
+// Handle Formulario Meu Cadastro Complete
+document.addEventListener('DOMContentLoaded', () => {
+    const cadForm = document.getElementById('cadastroForm');
+    if(cadForm) {
+        cadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const rawCpf = document.getElementById('cpf').value;
+            if(rawCpf && rawCpf.trim() !== '') {
+                if(!validarCPF(rawCpf)) {
+                    alert("CPF Inválido. Corrija-o ou deixe em branco.");
+                    return;
+                }
+            }
+            
+            const btn = document.getElementById('btnSalvarCadastro');
+            btn.innerHTML = 'Gravando...';
+            btn.disabled = true;
+            
+            const formData = new FormData(cadForm);
+            let payload = {};
+            for(let [key, val] of formData.entries()) {
+                payload[key] = val;
+            }
+            
+            // Get Current NIP
+            const currentNip = localStorage.getItem('vnt_role');
+            if(currentNip === 'sindico') {
+                alert("Síndico não usa este cadastro pessoal.");
+                btn.innerHTML = 'Salvar / Atualizar Dados';
+                btn.disabled = false;
+                return;
+            }
+            
+            if(!window._supabase) { alert("Aguarde, sistema off-line"); return; }
+            
+            try {
+                const {data, error} = await window._supabase.from('moradores').select('*').eq('nip', currentNip);
+                if(data && data.length > 0) {
+                    let oldData = data[0].dados || {};
+                    // Merge
+                    let merged = { ...oldData, ...payload };
+                    await window._supabase.from('moradores').update({ dados: merged }).eq('nip', currentNip);
+                    alert("Seus dados foram atualizados com sucesso!");
+                } else {
+                    // Force create if somehow missing
+                    payload.senha = 'marinha123';
+                    await window._supabase.from('moradores').insert([{ nip: currentNip, dados: payload }]);
+                    alert("Seus dados foram salvos com sucesso!");
+                }
+            } catch(ex) {
+                alert("Falha na rede.");
+            }
+            btn.innerHTML = 'Salvar / Atualizar Dados';
+            btn.disabled = false;
+        });
+    }
+});
+
+
+window.imprimirFichaCadastro = async function(nipTarget = null) {
+    let dados = {};
+    if(nipTarget && window._supabase) {
+        const { data } = await window._supabase.from('moradores').select('dados').eq('nip', nipTarget);
+        if(data && data.length > 0) {
+            dados = data[0].dados || {};
+        }
+    }
+    
+    // Safely get properties
+    const safeGet = (key) => dados[key] ? String(dados[key]).toUpperCase() : '';
+    const defBool = (key, expected) => dados[key] === expected ? '( X )' : '(   )';
+    
+    const printWindow = window.open('', '_blank');
+    if(!printWindow) return alert('Autorize popups neste site para gerar o PDF.');
+    
+    const html = 
+    <!DOCTYPE html>
+    <html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8">
+        <title>Ficha de Cadastro - Vila Naval</title>
+        <style>
+            @page { size: A4; margin: 20mm; }
+            body { font-family: 'Arial', sans-serif; color: #000; line-height: 1.4; margin:0; padding:0; }
+            .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
+            .header img { max-height: 80px; }
+            .header h1 { font-size: 16pt; margin: 5px 0 0 0; text-transform: uppercase; }
+            h2 { font-size: 12pt; background-color: #f0f0f0; border: 1px solid #000; padding: 5px; margin-top: 20px; }
+            .row { display: flex; flex-wrap: wrap; margin-bottom: 10px; }
+            .field { flex: 1; padding: 0 5px; }
+            .field-label { font-weight: bold; font-size: 9pt; }
+            .field-value { border-bottom: 1px solid #000; padding: 3px 0; min-height: 20px; font-size: 11pt; text-transform: uppercase; }
+            .box { border: 1px solid #000; padding: 10px; margin-bottom: 10px; }
+            .obs { font-size: 8pt; font-style: italic; margin-top: 30px; text-align: justify;}
+            
+            .signature { margin-top: 50px; text-align: center; width: 100%; display: flex; justify-content: space-around;}
+            .sig-line { border-top: 1px solid #000; width: 40%; padding-top: 5px; font-size: 10pt; }
+        </style>
+    </head>
+    <body onload="window.print(); window.onafterprint = function(){ window.close(); }">
+        <div class="header">
+            <!-- You can inject the literal encoded logo here or let it be text -->
+            <h1>MARINHA DO BRASIL</h1>
+            <h2>Vila Naval de Tabatinga (APVNT) - Ficha de Cadastro/Atualização</h2>
+        </div>
+        
+        <h2>DADOS DO PERMISSIONÁRIO (TITULAR)</h2>
+        <div class="box">
+            <div class="row">
+                <div class="field" style="flex: 2;"><div class="field-label">NOME COMPLETO:</div><div class="field-value"></div></div>
+                <div class="field" style="flex: 1;"><div class="field-label">POSTO/GRADUAÇÃO:</div><div class="field-value"></div></div>
+            </div>
+            <div class="row">
+                <div class="field"><div class="field-label">NIP:</div><div class="field-value"></div></div>
+                <div class="field"><div class="field-label">CPF:</div><div class="field-value"></div></div>
+                <div class="field"><div class="field-label">DATA NESCIMENTO:</div><div class="field-value"></div></div>
+            </div>
+            <div class="row">
+                <div class="field" style="flex: 1;"><div class="field-label">ENDEREÇO NA APVNT (PNR):</div><div class="field-value"></div></div>
+            </div>
+        </div>
+        
+        <h2>DADOS DOS DEPENDENTES / AGREGADOS</h2>
+        <div class="box">
+            <div class="row">
+                <div class="field" style="flex: 2;"><div class="field-label">1. NOME DO DEPENDENTE:</div><div class="field-value"></div></div>
+                <div class="field"><div class="field-label">GRAU DE PARENTESCO:</div><div class="field-value"></div></div>
+            </div>
+            <div class="row">
+                <div class="field"><div class="field-label">TELEFONE:</div><div class="field-value"></div></div>
+                <div class="field"><div class="field-label">DATA DE NASCIMENTO:</div><div class="field-value"></div></div>
+            </div>
+            <div class="row mt-2">
+                <div class="field"><div class="field-label">OUTROS DEPENDENTES:</div><div class="field-value" style="min-height: 40px;"></div></div>
+            </div>
+        </div>
+        
+        <h2>ANIMAIS DE ESTIMAÇÃO NO PNR</h2>
+        <div class="box">
+            <div class="row">
+                <div class="field"><div class="field-label">POSSUI ANIMAL?</div><div style="font-size:11pt; padding:5px 0;">  SIM &nbsp;&nbsp;  NÃO</div></div>
+                <div class="field"><div class="field-label">ESPÉCIE:</div><div class="field-value"></div></div>
+            </div>
+            <div class="row">
+                <div class="field" style="flex: 2;"><div class="field-label">NOME DO ANIMAL:</div><div class="field-value"></div></div>
+                <div class="field"><div class="field-label">RAÇA/PORTE:</div><div class="field-value"></div></div>
+            </div>
+            <div class="row">
+                <div class="field"><div class="field-label">VACINAS EM DIA?</div><div style="font-size:11pt; padding:5px 0;">  SIM &nbsp;&nbsp;  NÃO </div></div>
+            </div>
+        </div>
+        
+        <p class="obs">
+            Atesto sob as penas da lei e dos regulamentos militares a veracidade das informações ora prestadas, e comprometo-me a informar à Prefeitura da Vila Naval (Sistema APVNT) quaisquer atualizações ocorridas.
+        </p>
+        
+        <div class="signature">
+            <div class="sig-line">Local e Data</div>
+            <div class="sig-line">Assinatura do Permissionário</div>
+        </div>
+    </body>
+    </html>
+    ;
+    printWindow.document.write(html);
+    printWindow.document.close();
 }
