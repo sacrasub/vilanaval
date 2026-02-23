@@ -795,152 +795,19 @@ window.uploadFotoPNR = function (nip, input) {
 
 // Global Input Mask for NIP (00.0000.00)
 document.addEventListener('input', function (e) {
-    if (e.target && e.target.id === 'nip') {
-        let val = e.target.value;
-
-        // Se a pessoa estiver digitando letras (ex: "sindico"), ignora a mascara de numeros
-        if (/[A-Za-z]/.test(val)) return;
-
-        // Aplica a mascara 00.0000.00
-        let numbers = val.replace(/\D/g, '');
-        if (numbers.length > 0) {
-            let x = numbers.match(/(\d{0,2})(\d{0,4})(\d{0,2})/);
-            if (x) {
-                e.target.value = !x[2] ? x[1] : x[1] + (x[2] ? '.' + x[2] : '') + (x[3] ? '.' + x[3] : '');
+    if (e.target && (e.target.id === 'nip' || e.target.id === 'novoMoradorNip')) {
+        let rawVal = e.target.value;
+        if (rawVal.toLowerCase().startsWith('s') || rawVal.toLowerCase().startsWith('a')) { return; }
+        let val = rawVal.replace(/\D/g, '');
+        if (val.length > 8) val = val.slice(0, 8);
+        if (val.length > 2) {
+            val = val.replace(/^(\d{2})(\d)/, '.');
+            if (val.length > 7) {
+                val = val.replace(/^(\d{2})\.(\d{4})(\d)/, '..');
             }
         }
-    }
-});
-
-
-// Funcao para Validar NIP via Modulo 11 (Marinha do Brasil)
-function validarNIP(nipComMascara) {
-    let numbers = nipComMascara.replace(/\D/g, '');
-    if (numbers.length !== 8) return false;
-
-    let soma = 0;
-    let pesos = [8, 7, 6, 5, 4, 3, 2];
-    for (let i = 0; i < 7; i++) {
-        soma += parseInt(numbers[i]) * pesos[i];
-    }
-
-    let resto = soma % 11;
-    let dv = 11 - resto;
-    if (dv === 10 || dv === 11) {
-        dv = 0;
-    }
-
-    return dv === parseInt(numbers[7]);
-}
-
-
-// PASSWORD LOGIC
-window.abrirModalSenhaDashboard = function () {
-    const m = document.getElementById('modalSenhaDashboard');
-    if (m) m.style.display = 'flex';
-}
-window.fecharModalSenhaDashboard = function () {
-    const m = document.getElementById('modalSenhaDashboard');
-    if (m) m.style.display = 'none';
-}
-window.confirmarMudarSenhaDashboard = async function () {
-    const input = document.getElementById('novaSenhaInputDash');
-    const inputConf = document.getElementById('novaSenhaInputDashConf');
-    const novaSenha = input.value;
-    const novaSenhaConf = inputConf ? inputConf.value : novaSenha;
-    
-    if(novaSenha.length < 6) {
-        alert("A senha precisa ter pelo menos 6 caracteres.");
-        return;
-    }
-    if (novaSenha !== novaSenhaConf) {
-        alert("As senhas não coincidem.");
-        return;
-    }
-    
-    const nip = localStorage.getItem('vnt_role');
-    if(!window._supabase) {
-        alert("Falha de conexão com a Base de Dados. Tente novamente.");
-        return;
-    }
-    
-    document.getElementById('btnConfirmaNovaSenha').innerHTML = 'Salvando...';
-    try {
-        const { data, error } = await window._supabase.from('moradores').select('*').eq('nip', nip);
-        if(data && data.length > 0) {
-            let dados = data[0].dados || {};
-            dados.senha = novaSenha;
-            await window._supabase.from('moradores').update({ dados: dados }).eq('nip', nip);
-            alert("Senha alterada com sucesso!");
-        } else if (nip === 'sindico') {
-            let mockData = { nome: 'Síndico', senha: novaSenha };
-            await window._supabase.from('moradores').insert([{ nip: 'sindico', dados: mockData }]);
-            alert("Senha do Síndico cadastrada com sucesso na base!");
-        } else {
-            alert("Erro ao localizar seu registro no banco de dados.");
-        }
-        input.value = '';
-        if(inputConf) inputConf.value = '';
-        fecharModalSenhaDashboard();
-    } catch(e) {
-        alert("Erro fatal ao salvar senha.");
-    }
-    document.getElementById('btnConfirmaNovaSenha').innerHTML = 'Salvar Modificação';
-}
-
-window.resetarSenhaMorador = async function (nipTarget, nome) {
-    const confirmacao = confirm(`ATENÇÃO: Você tem certeza que deseja RESETAR a senha do morador ${nome} (NIP: ${nipTarget}) para o padrão "marinha123"? Isso exigirá que ele crie uma nova senha no proximo acesso.`);
-    if (!confirmacao) return;
-
-    if (!window._supabase) {
-        alert("Sistema Offline. Tente Novamente.");
-        return;
-    }
-
-    try {
-        const { data, error } = await window._supabase.from('moradores').select('*').eq('nip', nipTarget);
-        if (data && data.length > 0) {
-            let dados = data[0].dados || {};
-            dados.senha = "marinha123";
-            await window._supabase.from('moradores').update({ dados: dados }).eq('nip', nipTarget);
-            alert("Sucesso! A senha de " + nome + " foi completamente restaurada para marinha123.");
-        } else {
-            alert("Morador não encontrado no banco.");
-        }
-    } catch (e) {
-        alert("Falha ao comunicar com o servidor.");
-    }
-}
-
-window.togglePwd = function(inputId, iconId) {
-    const input = document.getElementById(inputId);
-    const icon = document.getElementById(iconId);
-    if(input && icon) {
-        if(input.type === 'password') {
-            input.type = 'text';
-            icon.classList.remove('ri-eye-line');
-            icon.classList.add('ri-eye-off-line');
-        } else {
-            input.type = 'password';
-            icon.classList.remove('ri-eye-off-line');
-            icon.classList.add('ri-eye-line');
-        }
-    }
-}
-
-
-// CPF Globals
-document.addEventListener('input', function (e) {
-    if (e.target && e.target.id === 'cpf') {
-        let val = e.target.value.replace(/\D/g, '');
-        if (val.length > 11) val = val.slice(0, 11);
-        if (val.length > 0) {
-            val = val.replace(/(\d{3})(\d)/, '.');
-            val = val.replace(/(\d{3})(\d)/, '.');
-            val = val.replace(/(\d{3})(\d{1,2})$/, '-');
-        }
         e.target.value = val;
-    }
+        }
 });
 
 function validarCPF(cpf) {
