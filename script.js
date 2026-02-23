@@ -19,13 +19,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         // Checagem Dinamica do Sindico
             if (nip === 'sindico' || nip.includes('admin')) {
                 let validPwd = 'sindico';
-                if (window._supabase) {
-                    const { data } = await window._supabase.from('moradores').select('dados').eq('nip', 'sindico');
-                    if (data && data.length > 0 && data[0].dados && data[0].dados.senha) {
-                        validPwd = data[0].dados.senha;
+                try {
+                    if (window._supabase) {
+                        const { data, error } = await window._supabase.from('moradores').select('dados').eq('nip', 'sindico');
+                        if (data && data.length > 0 && data[0].dados && data[0].dados.senha) {
+                            validPwd = data[0].dados.senha.trim();
+                        }
                     }
+                } catch(e) {
+                    console.error("Erro consultando supabase para sindico:", e);
                 }
-                if (senha !== validPwd) {
+                if (senha.trim() !== validPwd) {
                     alert("Senha do Síndico Incorreta!");
                     btn.innerHTML = 'Acessar <i class="ri-arrow-right-line"></i>';
                     btn.disabled = false;
