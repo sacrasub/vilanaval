@@ -947,7 +947,7 @@ window.imprimirFichaCadastro = async function(nipTarget = null) {
     const printWindow = window.open('', '_blank');
     if(!printWindow) return alert('Autorize popups neste site para gerar o PDF.');
     
-    const html = 
+    const html = `
     <!DOCTYPE html>
     <html lang="pt-BR">
     <head>
@@ -1034,7 +1034,7 @@ window.imprimirFichaCadastro = async function(nipTarget = null) {
         </div>
     </body>
     </html>
-    ;
+    `;
     printWindow.document.write(html);
     printWindow.document.close();
 }
