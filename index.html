@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vila Naval de Tabatinga - Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+</head>
+
+<body class="login-bg">
+    <div class="login-container">
+        <div class="glass-panel login-card">
+            <div class="logo-container">
+                <!-- Using the generated logo image conceptually -->
+                <div class="logo-circle" style="background: transparent; box-shadow: none;">
+                    <img src="logo.png" alt="Logo Vila Naval" style="width: 100px; height: 100px; object-fit: contain;">
+                </div>
+                <h1>Vila Naval Tabatinga</h1>
+                <p>Gestão e Convivência</p>
+            </div>
+
+            <form id="loginForm" class="login-form">
+                <div class="input-group">
+                    <i class="ri-user-3-line"></i>
+                    <input type="text" id="username" placeholder="NIP ou CPF" required>
+                </div>
+                <div class="input-group">
+                    <i class="ri-lock-line"></i>
+                    <input type="password" id="password" placeholder="Senha" required>
+                </div>
+                <div class="login-options">
+                    <label class="checkbox-container">
+                        <input type="checkbox">
+                        <span class="checkmark"></span>
+                        Lembrar-me
+                    </label>
+                    <a href="#" class="forgot-pwd">Esqueci a senha</a>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                    Acessar <i class="ri-arrow-right-line"></i>
+                </button>
+            </form>
+
+            <div class="login-footer">
+                <p>Primeiro acesso? <a href="#">Solicite seu cadastro</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
