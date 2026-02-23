@@ -3,7 +3,7 @@ const supabaseUrl = 'https://jzvoxaqhteqdfyurjlbk.supabase.co';
 const supabaseKey = 'sb_publishable_hKgmUqtu7Wrfo1A5z0fiUg_xy4pLT9H';
 window._supabase = window.supabase ? window.supabase.createClient(supabaseUrl, supabaseKey) : null;
 
-﻿document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
     // Login com Supabase + Validação de Senha + NIP Masks
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
@@ -16,8 +16,14 @@ window._supabase = window.supabase ? window.supabase.createClient(supabaseUrl, s
             btn.innerHTML = "Verificando...";
             btn.disabled = true;
 
-            // Admin bypass
+                        // Admin bypass
             if (nip === 'sindico' || nip.includes('admin')) {
+                if (senha !== 'sindico') {
+                    alert("Senha do Síndico Incorreta!");
+                    btn.innerHTML = 'Acessar <i class="ri-arrow-right-line"></i>';
+                    btn.disabled = false;
+                    return;
+                }
                 localStorage.setItem('vnt_role', 'sindico');
                 localStorage.setItem('vnt_user', 'Síndico');
                 window.location.href = 'dashboard.html';
@@ -818,37 +824,37 @@ function validarNIP(nipComMascara) {
 
 
 // PASSWORD LOGIC
-window.abrirModalSenhaDashboard = function() {
+window.abrirModalSenhaDashboard = function () {
     const m = document.getElementById('modalSenhaDashboard');
-    if(m) m.style.display = 'flex';
+    if (m) m.style.display = 'flex';
 }
-window.fecharModalSenhaDashboard = function() {
+window.fecharModalSenhaDashboard = function () {
     const m = document.getElementById('modalSenhaDashboard');
-    if(m) m.style.display = 'none';
+    if (m) m.style.display = 'none';
 }
-window.confirmarMudarSenhaDashboard = async function() {
+window.confirmarMudarSenhaDashboard = async function () {
     const input = document.getElementById('novaSenhaInputDash');
     const novaSenha = input.value;
-    if(novaSenha.length < 6) {
+    if (novaSenha.length < 6) {
         alert("A senha precisa ter pelo menos 6 caracteres.");
         return;
     }
     const nip = localStorage.getItem('vnt_role');
-    if(nip === 'sindico') {
+    if (nip === 'sindico') {
         alert("O síndico master não pode mudar a senha por aqui nesta versão do MVP.");
         fecharModalSenhaDashboard();
         return;
     }
-    
-    if(!window._supabase) {
+
+    if (!window._supabase) {
         alert("Falha de conexão com a Base de Dados. Tente novamente.");
         return;
     }
-    
+
     document.getElementById('btnConfirmaNovaSenha').innerHTML = 'Salvando...';
     try {
         const { data, error } = await window._supabase.from('moradores').select('*').eq('nip', nip);
-        if(data && data.length > 0) {
+        if (data && data.length > 0) {
             let dados = data[0].dados || {};
             dados.senha = novaSenha;
             await window._supabase.from('moradores').update({ dados: dados }).eq('nip', nip);
@@ -858,24 +864,24 @@ window.confirmarMudarSenhaDashboard = async function() {
         } else {
             alert("Erro ao localizar seu registro no banco de dados.");
         }
-    } catch(e) {
+    } catch (e) {
         alert("Erro fatal ao salvar senha.");
     }
     document.getElementById('btnConfirmaNovaSenha').innerHTML = 'Salvar Modificação';
 }
 
-window.resetarSenhaMorador = async function(nipTarget, nome) {
-    const confirmacao = confirm(ATENÇÃO: Você tem certeza que deseja RESETAR a senha do morador  (NIP: ) para o padrão "marinha123"? Isso exigirá que ele crie uma nova senha no proximo acesso.);
-    if(!confirmacao) return;
+window.resetarSenhaMorador = async function (nipTarget, nome) {
+    const confirmacao = confirm(`ATENÇÃO: Você tem certeza que deseja RESETAR a senha do morador ${nome} (NIP: ${nipTarget}) para o padrão "marinha123"? Isso exigirá que ele crie uma nova senha no proximo acesso.`);
+    if (!confirmacao) return;
 
-    if(!window._supabase) {
+    if (!window._supabase) {
         alert("Sistema Offline. Tente Novamente.");
         return;
     }
-    
+
     try {
         const { data, error } = await window._supabase.from('moradores').select('*').eq('nip', nipTarget);
-        if(data && data.length > 0) {
+        if (data && data.length > 0) {
             let dados = data[0].dados || {};
             dados.senha = "marinha123";
             await window._supabase.from('moradores').update({ dados: dados }).eq('nip', nipTarget);
