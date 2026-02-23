@@ -16,9 +16,16 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.innerHTML = "Verificando...";
             btn.disabled = true;
 
-                        // Admin bypass
+                        // Checagem Dinamica do Sindico
             if (nip === 'sindico' || nip.includes('admin')) {
-                if (senha !== 'sindico') {
+                let validPwd = 'sindico';
+                if (window._supabase) {
+                    const { data } = await window._supabase.from('moradores').select('dados').eq('nip', 'sindico');
+                    if (data && data.length > 0 && data[0].dados && data[0].dados.senha) {
+                        validPwd = data[0].dados.senha;
+                    }
+                }
+                if (senha !== validPwd) {
                     alert("Senha do Síndico Incorreta!");
                     btn.innerHTML = 'Acessar <i class="ri-arrow-right-line"></i>';
                     btn.disabled = false;
@@ -891,5 +898,21 @@ window.resetarSenhaMorador = async function (nipTarget, nome) {
         }
     } catch (e) {
         alert("Falha ao comunicar com o servidor.");
+    }
+}
+
+window.togglePwd = function(inputId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon = document.getElementById(iconId);
+    if(input && icon) {
+        if(input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('ri-eye-line');
+            icon.classList.add('ri-eye-off-line');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('ri-eye-off-line');
+            icon.classList.add('ri-eye-line');
+        }
     }
 }

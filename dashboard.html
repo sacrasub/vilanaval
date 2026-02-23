@@ -829,9 +829,15 @@
             <button onclick="fecharModalSenhaDashboard()" style="position:absolute; top: 10px; right: 15px; background: transparent; border:none; font-size:1.2rem; cursor:pointer;"><i class="ri-close-line"></i></button>
             <h3 style="color: var(--primary-color); margin-bottom: 10px;"><i class="ri-lock-password-line"></i> Alterar Senha</h3>
             <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;">Insira sua nova senha abaixo. Ela substituirá a senha atual imediatamente.</p>
-            <div class="input-group">
-                <i class="ri-lock-line" style="position: absolute; left: 35px; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
-                <input type="password" id="novaSenhaInputDash" placeholder="Nova Senha (min 6 caracteres)" style="width: 100%; padding: 12px 15px 12px 40px; border-radius: 8px; border: 1px solid var(--glass-border); margin-bottom: 15px;" required>
+            <div class="input-group" style="position:relative; margin-bottom:10px;">
+                <i class="ri-lock-line" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+                <input type="password" id="novaSenhaInputDash" placeholder="Nova Senha (min 6 chars)" style="width: 100%; padding: 12px 40px; border-radius: 8px; border: 1px solid var(--glass-border);" required>
+                <i class="ri-eye-line" id="toggleD1" style="position:absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--text-muted);" onclick="togglePwd('novaSenhaInputDash', 'toggleD1')"></i>
+            </div>
+            <div class="input-group" style="position:relative; margin-bottom:15px;">
+                <i class="ri-lock-line" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+                <input type="password" id="novaSenhaInputDashConf" placeholder="Confirme a nova senha" style="width: 100%; padding: 12px 40px; border-radius: 8px; border: 1px solid var(--glass-border);" required>
+                <i class="ri-eye-line" id="toggleD2" style="position:absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--text-muted);" onclick="togglePwd('novaSenhaInputDashConf', 'toggleD2')"></i>
             </div>
             <button id="btnConfirmaNovaSenha" class="btn btn-primary" onclick="confirmarMudarSenhaDashboard()" style="width: 100%; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none;">Salvar Modificação</button>
         </div>
