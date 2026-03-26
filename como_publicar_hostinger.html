@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial de Deploy - Hostinger</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #673ab7;
+            text-align: center;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            color: #4CAF50;
+            margin-top: 30px;
+        }
+
+        .step {
+            background-color: #f1f8e9;
+            border-left: 4px solid #8bc34a;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .step-number {
+            font-weight: bold;
+            color: #2e7d32;
+            font-size: 1.2em;
+        }
+
+        code {
+            background-color: #272822;
+            color: #f8f8f2;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: Consolas, monospace;
+        }
+
+        pre {
+            background-color: #272822;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .tip {
+            background-color: #fff3e0;
+            border: 1px solid #ffcc80;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🚀 Como Publicar seu Painel na Hostinger</h1>
+
+        <p>Este tutorial vai te guiar para configurar as credenciais do seu FTP da Hostinger com segurança e colocar o
+            sistema da Vila Naval online.</p>
+
+        <div class="step">
+            <span class="step-number">Passo 1:</span> Acesse o hPanel da Hostinger
+            <p>Faça login na sua conta da <a href="https://hpanel.hostinger.com/" target="_blank">Hostinger</a> e clique
+                em <strong>"Gerenciar"</strong> no plano de hospedagem que deseja usar.</p>
+        </div>
+
+        <div class="step">
+            <span class="step-number">Passo 2:</span> Encontre a seção Contas FTP
+            <p>No menu lateral esquerdo, procure por <strong>Arquivos</strong> e depois clique em <strong>Contas
+                    FTP</strong>.</p>
+        </div>
+
+        <div class="step">
+            <span class="step-number">Passo 3:</span> Colete suas Credenciais
+            <p>Na página de Contas FTP, você verá as informações de conexão. Copie os seguintes dados:</p>
+            <ul>
+                <li><strong>Hostname (IP ou servidor):</strong> (ex: ftp.seudominio.com.br ou 192.168.1.1)</li>
+                <li><strong>Nome do Usuário:</strong> (ex: u123456789)</li>
+                <li><strong>Senha do FTP:</strong> (A senha que você definiu ao criar a conta ou a senha do seu painel)
+                </li>
+            </ul>
+        </div>
+
+        <div class="step">
+            <span class="step-number">Passo 4:</span> Preencha o arquivo .env
+            <p>Abra o arquivo <code>.env</code> no seu Visual Studio Code. Ele fica na mesma pasta do seu projeto.
+                Preencha sem aspas e sem espaços extras após o sinal de igual (<code>=</code>):</p>
+            <pre>
+FTP_HOST=ftp.SEUDOMINIO.com.br
+FTP_USER=SEU_USUARIO_AQUI
+FTP_PASSWORD=SUA_SENHA_AQUI
+FTP_REMOTE_PATH=/public_html
+            </pre>
+            <div class="tip">
+                <strong>💡 Dica:</strong> O <code>FTP_REMOTE_PATH</code> geralmente é <code>/public_html</code> se você
+                for colocar o sistema na página principal do seu site. Se for colocar em uma subpasta (ex:
+                meudominio.com.br/painel), use <code>/public_html/painel</code>.
+            </div>
+        </div>
+
+        <div class="step">
+            <span class="step-number">Passo 5:</span> Avise o Assistente!
+            <p>Depois de salvar o arquivo <code>.env</code> com as suas informações verdadeiras, escreva no chat:</p>
+            <p><strong>"Pronto, preenchi os dados. Pode fazer o deploy"</strong></p>
+            <p>O robô irá ler as credenciais localmente no seu computador e enviará os arquivos prontos para o servidor!
+            </p>
+        </div>
+    </div>
+</body>
+
+</html>

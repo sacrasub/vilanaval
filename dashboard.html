@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vila Naval de Tabatinga - Painel de Gestão</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+</head>
+
+<body class="dashboard-bg">
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar glass-panel">
+            <div class="sidebar-header">
+                <div class="logo-circle small" style="background: transparent; box-shadow: none;">
+                    <svg viewBox="0 0 100 100" width="100%" height="100%">
+                        <circle cx="50" cy="50" r="45" fill="none" stroke="#fff" stroke-width="2" />
+                        <path d="M50 20 L50 80 M30 40 Q50 60 70 40" stroke="#D4AF37" stroke-width="4" fill="none" />
+                        <circle cx="50" cy="20" r="4" fill="#D4AF37" />
+                        <path d="M25 40 L35 40 M65 40 L75 40" stroke="#D4AF37" stroke-width="4" />
+                        <path d="M40 70 L60 70" stroke="#D4AF37" stroke-width="4" />
+                    </svg>
+                </div>
+                <h2>VNT</h2>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-target="dashboard">
+                    <i class="ri-dashboard-line"></i> <span>Início</span>
+                </a>
+                <a href="#" class="nav-item" data-target="mural">
+                    <i class="ri-notification-3-line"></i> <span>Mural de Avisos</span>
+                </a>
+                <a href="#" class="nav-item" data-target="reservas">
+                    <i class="ri-calendar-check-line"></i> <span>Reservas</span>
+                </a>
+                <a href="#" class="nav-item" data-target="chamados">
+                    <i class="ri-tools-line"></i> <span>Meus Chamados</span>
+                </a>
+                <a href="#" class="nav-item" data-target="normas">
+                    <i class="ri-file-text-line"></i> <span>Normas da Vila</span>
+                </a>
+                <a href="#" class="nav-item user-role" data-target="cadastro">
+                    <i class="ri-survey-line"></i> <span id="lblMenuCadastro">Meu Cadastro</span>
+                </a>
+
+                <div class="admin-only"
+                    style="margin-top: 20px; border-top: 1px solid var(--glass-border); padding-top: 10px;">
+                    <span
+                        style="padding: 0 24px; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 1px;">Gestão</span>
+                    <a href="#" class="nav-item" data-target="admin-chamados">
+                        <i class="ri-kanban-view"></i> <span>Painel de Chamados</span>
+                    </a>
+                    <a href="#" class="nav-item" data-target="admin-pnrs">
+                        <i class="ri-community-line"></i> <span>Ocupação & PNRs</span>
+                    </a>
+                    <a href="#" class="nav-item" data-target="admin">
+                        <i class="ri-settings-4-line"></i> <span>Ajustes Gerais</span>
+                    </a>
+                </div>
+            </nav>
+
+            <div class="user-profile">
+                <img src="https://ui-avatars.com/api/?name=Sindico&background=0A2342&color=D4AF37" alt="Avatar"
+                    id="userAvatar">
+                <div class="user-info">
+                    <h4 id="userNameDisplay">Usuário</h4>
+                    <p id="userRoleDisplay">Permissionário</p>
+                </div>
+                <button class="logout-btn" title="Alterar Senha" onclick="abrirModalSenhaDashboard()"
+                    style="color:var(--primary); margin-right:5px;"><i class="ri-lock-password-line"></i></button>
+                <button id="logoutBtn" class="logout-btn" title="Sair"><i class="ri-logout-box-r-line"></i></button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <div>
+                    <h1 id="pageTitle">Bem-vindo à Vila Naval</h1>
+                    <p class="subtitle">Tabatinga - AM</p>
+                </div>
+                <div class="header-actions">
+                    <button class="icon-btn"><i class="ri-search-line"></i></button>
+                    <button class="icon-btn notification-badge"><i class="ri-bell-line"></i></button>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <!-- Dashboard Tab -->
+                <section id="dashboard" class="tab-pane active">
+                    <div class="stats-grid">
+                        <div class="stat-card glass-panel">
+                            <div class="stat-icon"><i class="ri-group-line"></i></div>
+                            <div>
+                                <h3>Total Permissionários</h3>
+                                <div class="value">42</div>
+                            </div>
+                        </div>
+                        <div class="stat-card glass-panel">
+                            <div class="stat-icon"><i class="ri-home-smile-line"></i></div>
+                            <div>
+                                <h3>Casas Ocupadas</h3>
+                                <div class="value">95%</div>
+                            </div>
+                        </div>
+                        <div class="stat-card glass-panel">
+                            <div class="stat-icon"><i class="ri-calendar-event-line"></i></div>
+                            <div>
+                                <h3>Reservas Ativas</h3>
+                                <div class="value">3</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="card glass-panel">
+                            <div class="card-header">
+                                <h3><i class="ri-pushpin-line"></i> Últimos Avisos</h3>
+                                <button class="text-btn" id="btnMuralHomeAcao">Ver todos</button>
+                            </div>
+                            <div class="card-body">
+                                <ul class="notice-list" id="muralHomeList">
+                                    <li>
+                                        <div class="notice-date" style="background:#48bb78;">Ativo</div>
+                                        <div class="notice-content">
+                                            <h4>Grupo Oficial WhatsApp</h4>
+                                            <p>Avisos, comunicados e prestação de contas. <a href="#"
+                                                    onclick="document.querySelector('[data-target=\'mural\']').click()">Acesse
+                                                    o Mural para as regras</a>.</p>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="card glass-panel">
+                            <div class="card-header">
+                                <h3><i class="ri-calendar-todo-line"></i> Minhas Reservas</h3>
+                                <button class="btn btn-sm btn-outline" id="btnReservaHomeAcao"
+                                    onclick="document.querySelector('[data-target=\'reservas\']').click()">Nova
+                                    Reserva</button>
+                            </div>
+                            <div class="card-body">
+                                <div class="empty-state">
+                                    <i class="ri-calendar-line"></i>
+                                    <p>Nenhuma reserva para os próximos dias.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Mural Tab -->
+                <section id="mural" class="tab-pane">
+                    <div class="card glass-panel mb-3">
+                        <div class="card-header"
+                            style="background-color: var(--primary); color: white; border-radius: 8px 8px 0 0;">
+                            <h3 style="color: white;"><i class="ri-whatsapp-line"></i> Grupo Oficial: Nossa Vila Naval
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Destinado a:</strong> Moradores, permissionários e dependentes.</p>
+                            <p class="mt-2"><strong>🎯 Finalidade:</strong> Canal exclusivo para informações, avisos,
+                                comunicados e prestação de contas da administração da Vila Naval.</p>
+
+                            <h4 class="mt-4"><i class="ri-error-warning-line text-accent"></i> Regras do Grupo:</h4>
+                            <ul style="margin-left: 20px; margin-top: 10px; line-height: 1.6;">
+                                <li>Somente administradores podem enviar mensagens.</li>
+                                <li>à‰ proibido debate, propaganda ou mensagens particulares.</li>
+                                <li>Informações pessoais devem ser tratadas em privado com a administração.</li>
+                                <li>Mantenha sempre o respeito e o espà­rito de comunidade.</li>
+                                <li>O grupo destina-se exclusivamente a assuntos da Vila Naval.</li>
+                            </ul>
+
+                            <div class="mt-4 alert-info"
+                                style="padding: 15px; border-radius: 8px; border: 1px solid #bee3f8; background-color: #ebf8ff;">
+                                <strong>⚓ Formulário de Comunicação:</strong> Para enviar sugestões, tirar dúvidas ou
+                                tratar com a Administração, utilize o nosso canal oficial.
+                                <br><br>
+                                <a href="https://forms.gle/p2iqU1uZRWDrxLCW7" target="_blank" class="btn btn-primary"><i
+                                        class="ri-links-line"></i> Acessar Formulário de Comunicação</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card glass-panel" style="border: 2px solid #e53e3e;">
+                        <div class="card-header" style="background-color: #fff5f5;">
+                            <h3><i class="ri-file-user-line text-danger"></i> Cadastro de Moradores (Prazo: 05/03/2026)
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <p>Prezados permissionários, está **obrigatório** o preenchimento do formulário online para
+                                cadastro geral da APVNT.</p>
+                            <p class="mt-2"><strong>O que preencher:</strong></p>
+                            <ul style="margin-left: 20px; margin-top: 5px;">
+                                <li>Dados pessoais (Posto, Nome, NIP, Data de Nascimento, etc.)</li>
+                                <li>Dados de dependentes (se houver)</li>
+                                <li>Informações sobre animais de estimação</li>
+                                <li>Aceite dos termos de compromisso</li>
+                            </ul>
+                            <a href="#" onclick="document.querySelector('[data-target=\'cadastro\']').click()"
+                                class="btn btn-primary mt-4" style="background-color: var(--primary);"><i
+                                    class="ri-survey-line"></i> Ir para o Cadastro de Moradores</a>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Reservas Tab -->
+                <section id="reservas" class="tab-pane">
+                    <div style="display: grid; grid-template-columns: 3fr 2fr; gap: 20px; align-items: start;">
+                        <!-- Calendário -->
+                        <div class="card glass-panel" style="background:#fff;">
+                            <div class="card-header">
+                                <div
+                                    style="display:flex; align-items:center; justify-content:space-between; width:100%;">
+                                    <h3><i class="ri-calendar-event-line"></i> Calendário de Ocupação</h3>
+                                    <button class="btn btn-sm btn-outline" onclick="window.printSection('reservas')"><i
+                                            class="ri-printer-line"></i> Imprimir Calendário</button>
+                                </div>
+                            </div>
+                            <div class="card-body" style="padding: 10px;">
+                                <div id="reservasCalendar"></div>
+                            </div>
+                        </div>
+
+                        <!-- Form de Solicitação -->
+                        <div class="card glass-panel">
+                            <div class="card-header">
+                                <h3>Solicitar Reserva de Espaço</h3>
+                            </div>
+                            <div class="card-body">
+                                <form class="reservation-form" id="formReserva">
+                                    <div class="form-group mb-3">
+                                        <label>Espaço</label>
+                                        <select id="reservaEspaco" required>
+                                            <option value="">Selecione...</option>
+                                            <option value="clube">Clube da Vila</option>
+                                            <option value="salao">Salão de Festas</option>
+                                            <option value="churrasqueira">Churrasqueira</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label>Data Selecionada (Clique no Calendário)</label>
+                                        <input type="text" id="reservaData" readonly
+                                            placeholder="Escolha um dia livre na esquerda..." required
+                                            style="background: #f1f5f9; cursor: not-allowed; border: 1px dashed #cbd5e1;">
+                                    </div>
+                                    <div class="form-row" style="margin-bottom: 15px;">
+                                        <div class="form-group">
+                                            <label>Início</label>
+                                            <input type="time" id="reservaHoraInicio" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Hora Prevista do Fim <small class="text-danger">(Máx
+                                                    23:00h)</small></label>
+                                            <input type="time" id="reservaHoraFim" required>
+                                        </div>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label>Motivo / Evento</label>
+                                        <input type="text" id="reservaMotivo" placeholder="Ex: Aniversário" required>
+                                    </div>
+
+                                    <div class="alert-info"
+                                        style="font-size: 0.85rem; padding: 10px; border-radius: 5px; background: #fff5f5; border-left: 4px solid #e53e3e; margin-bottom: 15px;">
+                                        <i class="ri-information-line text-danger"></i> <strong>Aviso
+                                            Normativo:</strong> O limite para festividades é impreterivelmente às
+                                        23:00h. O sistema bloqueará violações!
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary" style="width: 100%;">Agendar /
+                                        Reservar</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Normas Tab -->
+                <section id="normas" class="tab-pane">
+                    <div class="card glass-panel">
+                        <div class="card-header">
+                            <div style="display:flex; align-items:center; justify-content:space-between; width:100%;">
+                                <h3><i class="ri-file-text-line"></i> Normas e Regimentos da Vila Naval</h3>
+                                <button class="btn btn-sm btn-outline admin-only" onclick="adicionarNorma()"
+                                    style="display:none; color:#38a169; border-color:#38a169;"><i
+                                        class="ri-add-line"></i> Nova Norma</button>
+                                <button class="btn btn-sm btn-outline" onclick="window.printSection('normas')"><i
+                                        class="ri-printer-line"></i> Imprimir Normas</button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="normas-content">
+                                <p class="mb-3 text-muted">Acesso rápido a todos os documentos e regulamentos aplicáveis
+                                    à  Vila Naval.</p>
+
+                                <!-- Nà­vel Local -->
+                                <h4 class="mt-2"><i class="ri-map-pin-line"></i> Nà­vel Local (CFT/APVNT)</h4>
+                                <ul class="doc-list">
+                                    <li>
+                                        <div class="doc-info"><i class="ri-file-text-fill text-primary"></i> <span>Ordem
+                                                Interna nÂº 02-09D â€“ CFT</span></div>
+                                        <button class="btn btn-sm btn-outline"
+                                            onclick="alert('Visualização doc da OI em breve')"><i
+                                                class="ri-eye-line"></i> Ver</button>
+                                    </li>
+                                    <li>
+                                        <div class="doc-info"><i class="ri-file-text-fill text-primary"></i>
+                                            <span>Estatuto da APVNT</span>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline"
+                                            onclick="alert('Visualização doc do Estatuto em breve')"><i
+                                                class="ri-eye-line"></i> Ver</button>
+                                    </li>
+                                    <li>
+                                        <div class="doc-info"><i class="ri-file-text-line text-muted"></i> <span
+                                                class="text-muted">Manual do Permissionário</span> <span
+                                                class="badge badge-warning">Em elaboração</span></div>
+                                        <button class="btn btn-sm btn-outline" disabled><i class="ri-eye-off-line"></i>
+                                            Indisponà­vel</button>
+                                    </li>
+                                </ul>
+
+                                <!-- Formulários -->
+                                <h4 class="mt-4"><i class="ri-pages-line"></i> Formulários e Anexos (OI 02-09D)</h4>
+                                <ul class="doc-list">
+                                    <li>
+                                        <div class="doc-info"><i class="ri-file-download-fill text-accent"></i>
+                                            <span>Anexo B â€“ Termo de Permissão de Uso (TPU)</span>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline"
+                                            onclick="alert('Funcionalidade de download do anexo a ser implementada')"><i
+                                                class="ri-download-line"></i> Baixar</button>
+                                    </li>
+                                    <li>
+                                        <div class="doc-info"><i class="ri-file-download-fill text-accent"></i>
+                                            <span>Anexo E â€“ Termo de Compromisso de Comportamento</span>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline"
+                                            onclick="alert('Funcionalidade de download do anexo a ser implementada')"><i
+                                                class="ri-download-line"></i> Baixar</button>
+                                    </li>
+                                    <li>
+                                        <div class="doc-info"><i class="ri-file-download-fill text-accent"></i>
+                                            <span>Anexo H â€“ Relatório Mensal do Sà­ndico</span>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline"
+                                            onclick="alert('Funcionalidade de download do anexo a ser implementada')"><i
+                                                class="ri-download-line"></i> Baixar</button>
+                                    </li>
+                                    <li>
+                                        <div class="doc-info"><i class="ri-file-download-fill text-accent"></i>
+                                            <span>Anexo I â€“ Declaração de Dependentes</span>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline"
+                                            onclick="alert('Funcionalidade de download do anexo a ser implementada')"><i
+                                                class="ri-download-line"></i> Baixar</button>
+                                    </li>
+                                    <li>
+                                        <div class="doc-info"><i class="ri-file-download-fill text-accent"></i>
+                                            <span>Anexo J â€“ Papeleta de Pedido de Serviço</span>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline"
+                                            onclick="alert('Funcionalidade de download do anexo a ser implementada')"><i
+                                                class="ri-download-line"></i> Baixar</button>
+                                    </li>
+                                </ul>
+
+                                <!-- Nà­vel Distrital -->
+                                <h4 class="mt-4"><i class="ri-building-line"></i> Nà­vel Distrital (9Âº Distrito Naval)
+                                </h4>
+                                <ul class="doc-list">
+                                    <li>
+                                        <div class="doc-info"><i class="ri-file-text-fill text-primary"></i>
+                                            <span>NORDINAVNOROESTE nÂº 01.5-01B</span>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline"
+                                            onclick="alert('Visualização NORDINAV 01.5 em breve')"><i
+                                                class="ri-eye-line"></i> Ver</button>
+                                    </li>
+                                    <li>
+                                        <div class="doc-info"><i class="ri-file-text-fill text-primary"></i>
+                                            <span>NORDINAVNOROESTE nÂº 07-01</span>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline"
+                                            onclick="alert('Visualização NORDINAV 07-01 em breve')"><i
+                                                class="ri-eye-line"></i> Ver</button>
+                                    </li>
+                                </ul>
+
+                                <!-- Normas Superiores -->
+                                <h4 class="mt-4"><i class="ri-government-line"></i> Normas Superiores (Fundamentação
+                                    Jurà­dica)</h4>
+                                <ul class="doc-list">
+                                    <li>
+                                        <div class="doc-info"><i class="ri-file-text-fill text-primary"></i>
+                                            <span>SGM-801 â€“ Normas para o Patrimà´nio Imobiliário</span>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline"
+                                            onclick="alert('Visualização SGM-801 em breve')"><i class="ri-eye-line"></i>
+                                            Ver</button>
+                                    </li>
+                                    <li>
+                                        <div class="doc-info"><i class="ri-external-link-line text-primary"></i>
+                                            <span>Lei nÂº 6.880 â€“ Estatuto dos Militares</span>
+                                        </div>
+                                        <a href="https://www.planalto.gov.br/ccivil_03/leis/l6880.htm" target="_blank"
+                                            class="btn btn-sm btn-outline"><i class="ri-global-line"></i> Acessar</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <section id="admin" class="tab-pane">
+                    <div class="card glass-panel alert-info">
+                        <h3>Ajustes Gerais do Sà­ndico</h3>
+                        <p>Acesso exclusivo para gerenciar avisos gerais.</p>
+                        <br>
+                        <div class="stats-grid">
+                            <button class="btn btn-primary"><i class="ri-add-line"></i> Novo Aviso</button>
+                            <button class="btn btn-primary"><i class="ri-file-upload-line"></i> Atualizar Normas e
+                                Documentos</button>
+                            <a href="#" onclick="document.querySelector('[data-target=\'admin-pnrs\']').click()"
+                                class="btn btn-primary" style="background-color: var(--primary);"><i
+                                    class="ri-survey-line"></i> Acompanhar
+                                Cadastros</a>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Permissionários: Meus Chamados -->
+                <section id="chamados" class="tab-pane">
+                    <div class="card glass-panel">
+                        <div class="card-header">
+                            <h3><i class="ri-tools-line"></i> Meus Chamados (Anexo J)</h3>
+                            <button class="btn btn-sm btn-primary"
+                                onclick="document.getElementById('modalNovoChamado').style.display='flex'">Novo
+                                Chamado</button>
+                        </div>
+                        <div class="card-body">
+                            <div class="empty-state" id="emptyChamados">
+                                <i class="ri-file-list-3-line"></i>
+                                <p>Você ainda não abriu nenhum chamado para sua PNR.</p>
+                            </div>
+                            <div id="listaMeusChamados" class="chamados-list"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Admin: Painel de Chamados Kanban -->
+                <section id="admin-chamados" class="tab-pane">
+                    <div class="card glass-panel">
+                        <div class="card-header">
+                            <div style="display:flex; align-items:center; justify-content:space-between; width:100%;">
+                                <h3><i class="ri-kanban-view"></i> Gestão de Chamados da Vila</h3>
+                                <button class="btn btn-sm btn-outline"
+                                    onclick="window.printSection('admin-chamados')"><i class="ri-printer-line"></i>
+                                    Imprimir Relatório OMR</button>
+                            </div>
+                        </div>
+                        <div class="card-body" style="background: transparent;">
+                            <div class="kanban-board">
+                                <div class="kanban-column">
+                                    <h4>Abertos / Pendentes</h4>
+                                    <div class="kanban-dropzone" id="kb-abertos"></div>
+                                </div>
+                                <div class="kanban-column">
+                                    <h4>Em Análise (Resp. OMR/Morador)</h4>
+                                    <div class="kanban-dropzone" id="kb-analise"></div>
+                                </div>
+                                <div class="kanban-column">
+                                    <h4>Concluà­dos</h4>
+                                    <div class="kanban-dropzone" id="kb-concluidos"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Admin: Cadastro de PNRs e Ocupação -->
+                <section id="admin-pnrs" class="tab-pane">
+                    <div class="card glass-panel">
+                        <div class="card-header">
+                            <h3><i class="ri-community-line"></i> Ocupação das PNRs</h3>
+                            <div>
+                                <span class="badge" id="badgeOcupado"
+                                    style="background:#c6f6d5; color:#22543d;">Ocupado: 0</span>
+                                <span class="badge" style="background:#e2e8f0; color:#4a5568;">Vago (Taxa União):
+                                    2</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="pnr-grid" id="pnrGridContainer">
+                                <!-- Dynamic PNRs rendered by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="cadastro" class="tab-pane">
+                    <div class="card glass-panel">
+                        <div class="card-body" style="padding:40px;">
+                            <h2>Cadastro de Moradores</h2>
+                            <form id="cadastroForm">
+                                <!-- Seção 1: Dados Pessoais -->
+                                <section class="form-group">
+                                    <h2>Dados Pessoais</h2>
+
+                                    <div class="field">
+                                        <label for="posto">Posto/Graduação *</label>
+                                        <select id="posto" name="posto" required>
+                                            <option value="">Selecione...</option>
+                                            <option value="Almirante">Almirante</option>
+                                            <option value="Vice-Almirante">Vice-Almirante</option>
+                                            <option value="Contra-Almirante">Contra-Almirante</option>
+                                            <option value="Capitão de Mar e Guerra">Capitão de Mar e Guerra</option>
+                                            <option value="Capitão de Fragata">Capitão de Fragata</option>
+                                            <option value="Capitão de Corveta">Capitão de Corveta</option>
+                                            <option value="Capitão-Tenente">Capitão-Tenente</option>
+                                            <option value="Primeiro-Tenente">Primeiro-Tenente</option>
+                                            <option value="Segundo-Tenente">Segundo-Tenente</option>
+                                            <option value="Guarda-Marinha">Guarda-Marinha</option>
+                                            <option value="Suboficial">Suboficial</option>
+                                            <option value="Primeiro-Sargento">Primeiro-Sargento</option>
+                                            <option value="Segundo-Sargento">Segundo-Sargento</option>
+                                            <option value="Terceiro-Sargento">Terceiro-Sargento</option>
+                                            <option value="Cabo">Cabo</option>
+                                            <option value="Marinheiro">Marinheiro</option>
+                                        </select>
+                                        <span class="error-message"></span>
+                                    </div>
+
+                                    <div class="field">
+                                        <label for="nomeCompleto">Nome Completo *</label>
+                                        <input type="text" id="nomeCompleto" name="nomeCompleto" required>
+                                        <span class="error-message"></span>
+                                    </div>
+
+                                    <div class="field">
+                                        <label for="nip">NIP *</label>
+                                        <input type="text" id="nip" name="nip" required>
+                                        <span class="error-message"></span>
+                                    </div>
+
+                                    <div class="field">
+                                        <label for="cpf">CPF</label>
+                                        <input type="text" id="cpf" name="cpf" placeholder="000.000.000-00">
+                                        <span class="error-message"></span>
+                                    </div>
+
+                                    <div class="field">
+                                        <label for="dataNascimentoTitular">Data de Nascimento do Titular *</label>
+                                        <input type="date" onclick="this.showPicker()" id="dataNascimentoTitular"
+                                            name="dataNascimentoTitular" required>
+                                        <span class="error-message"></span>
+                                    </div>
+
+                                    <div class="field">
+                                        <label for="endereco">Endereço PNR *</label>
+                                        <select id="endereco" name="endereco" required>
+                                            <option value="">Selecione...</option>
+                                            <option value="Ed. SG Lisboa - Apto 101">Ed. SG Lisboa - Apto 101</option>
+                                            <option value="Ed. SG Lisboa - Apto 102">Ed. SG Lisboa - Apto 102</option>
+                                            <option value="Ed. SG Lisboa - Apto 103">Ed. SG Lisboa - Apto 103</option>
+                                            <option value="Ed. SG Lisboa - Apto 104">Ed. SG Lisboa - Apto 104</option>
+                                            <option value="Ed. SG Lisboa - Apto 105">Ed. SG Lisboa - Apto 105</option>
+                                            <option value="Ed. SG Lisboa - Apto 106">Ed. SG Lisboa - Apto 106</option>
+                                            <option value="Ed. SG Lisboa - Apto 201">Ed. SG Lisboa - Apto 201</option>
+                                            <option value="Ed. SG Lisboa - Apto 202">Ed. SG Lisboa - Apto 202</option>
+                                            <option value="Ed. SG Lisboa - Apto 203">Ed. SG Lisboa - Apto 203</option>
+                                            <option value="Ed. SG Lisboa - Apto 204">Ed. SG Lisboa - Apto 204</option>
+                                            <option value="Ed. SG Lisboa - Apto 205">Ed. SG Lisboa - Apto 205</option>
+                                            <option value="Ed. SG Lisboa - Apto 206">Ed. SG Lisboa - Apto 206</option>
+                                            <option value="Ed. SG Lisboa - Apto 301">Ed. SG Lisboa - Apto 301</option>
+                                            <option value="Ed. SG Lisboa - Apto 302">Ed. SG Lisboa - Apto 302</option>
+                                            <option value="Ed. SG Lisboa - Apto 303">Ed. SG Lisboa - Apto 303</option>
+                                            <option value="Ed. SG Lisboa - Apto 304">Ed. SG Lisboa - Apto 304</option>
+                                            <option value="Ed. SG Lisboa - Apto 305">Ed. SG Lisboa - Apto 305</option>
+                                            <option value="Ed. SG Lisboa - Apto 306">Ed. SG Lisboa - Apto 306</option>
+                                            <option value="Casa 01">Casa 01</option>
+                                            <option value="Casa 02">Casa 02</option>
+                                            <option value="Casa 03">Casa 03</option>
+                                            <option value="Casa 04">Casa 04</option>
+                                            <option value="Casa 05">Casa 05</option>
+                                            <option value="Casa 06">Casa 06</option>
+                                            <option value="Casa 07">Casa 07</option>
+                                            <option value="Casa 08">Casa 08</option>
+                                            <option value="Casa 09">Casa 09</option>
+                                            <option value="Casa 10">Casa 10</option>
+                                            <option value="Casa 11">Casa 11</option>
+                                            <option value="Casa 12">Casa 12</option>
+                                            <option value="Casa 13">Casa 13</option>
+                                            <option value="Casa 14">Casa 14</option>
+                                            <option value="Casa 15">Casa 15</option>
+                                            <option value="Casa 16">Casa 16</option>
+                                            <option value="Casa 17">Casa 17</option>
+                                            <option value="Casa 18">Casa 18</option>
+                                            <option value="Casa 19">Casa 19</option>
+                                        </select>
+                                        <span class="error-message"></span>
+                                    </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+
+
+            <!-- Admin: Relatório do Síndico -->
+            <section id="relatorio-sindico" class="tab-pane">
+                <div class="card glass-panel" id="relatorio-h">
+                    <div class="card-header"
+                        style="display:flex; align-items:center; justify-content:space-between; width:100%;">
+                        <h3><i class="ri-file-chart-line"></i> Relatório Mensal do Síndico (Anexo H)</h3>
+                        <button class="btn btn-sm btn-outline" onclick="window.printSection('relatorio-h')"><i
+                                class="ri-printer-line"></i> Imprimir</button>
+                    </div>
+                    <div class="card-body">
+                        <form>
+                            <div class="form-group mb-3">
+                                <label>Mês de Referência</label>
+                                <input type="month" onclick="this.showPicker()" class="form-control"
+                                    style="width:100%; border-radius:8px; border:1px solid #e2e8f0; padding:10px;"
+                                    required>
+                            </div>
+
+                            <h4>1. PNRs Verificadas e Condições</h4>
+                            <table style="width:100%; border-collapse:collapse; margin-bottom: 20px;">
+                                <tr style="background:#f7fafc; text-align:left;">
+                                    <th style="padding:10px; border-bottom:1px solid #cbd5e1;">PNR</th>
+                                    <th style="padding:10px; border-bottom:1px solid #cbd5e1;">Status</th>
+                                    <th style="padding:10px; border-bottom:1px solid #cbd5e1;">Observações</th>
+                                </tr>
+                                <tr>
+                                    <td style="padding:10px; border-bottom:1px solid #edf2f7;">Ed. SG Lisboa - Apto 101
+                                    </td>
+                                    <td style="padding:10px; border-bottom:1px solid #edf2f7;"><span class="badge"
+                                            style="background:#c6f6d5; color:#22543d;">Vistoriado</span></td>
+                                    <td style="padding:10px; border-bottom:1px solid #edf2f7;"><input type="text"
+                                            placeholder="Sem alterações"
+                                            style="width:100%; border:none; background:transparent;"></td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:10px; border-bottom:1px solid #edf2f7;">Casa 01</td>
+                                    <td style="padding:10px; border-bottom:1px solid #edf2f7;"><span class="badge"
+                                            style="background:#fed7d7; color:#c53030;">Problema Identificado</span></td>
+                                    <td style="padding:10px; border-bottom:1px solid #edf2f7;"><input type="text"
+                                            value="Pintura descascando na fachada"
+                                            style="width:100%; border:none; background:transparent;"></td>
+                                </tr>
+                            </table>
+
+                            <h4>2. Áreas Comuns</h4>
+                            <div class="form-group mb-3">
+                                <textarea rows="3"
+                                    style="width:100%; border-radius:8px; border:1px solid #e2e8f0; padding:10px;"
+                                    placeholder="Relate o estado do Clube, salão de festas e áreas recreativas..."></textarea>
+                            </div>
+
+                            <h4>3. Ocorrências Excepcionais</h4>
+                            <div class="form-group mb-3">
+                                <textarea rows="3"
+                                    style="width:100%; border-radius:8px; border:1px solid #e2e8f0; padding:10px;"
+                                    placeholder="Relate quebras de regra, intervenções urgentes ou atividades anômalas..."></textarea>
+                            </div>
+
+                            <button type="button" class="btn btn-primary" style="width:100%;"
+                                onclick="alert('Relatório Salvo no Sistema. (Mock)')"><i class="ri-save-line"></i>
+                                Salvar e Assinar Relatório</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Modals -->
+            <div id="modalNovoChamado" class="modal-overlay" style="display:none;">
+                <div class="modal-content glass-panel">
+                    <h3>Abrir Pedido de Serviço (Anexo J)</h3>
+                    <form id="formNovoChamado">
+                        <div class="form-group mt-2">
+                            <label>Classificação do Problema</label>
+                            <select id="chamadoTipo" required>
+                                <option value="">Selecione...</option>
+                                <option value="A">Prioridade A (Segurança/Habitabilidade)</option>
+                                <option value="B">Prioridade B (Conservação/Melhoria)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Descrição Detalhada</label>
+                            <textarea id="chamadoDesc" rows="4"
+                                style="width:100%; border-radius:8px; border:1px solid #e2e8f0; padding:10px; font-family: Outfit;"
+                                required></textarea>
+                        </div>
+                        <div class="form-row">
+                            <button type="button" class="btn btn-outline"
+                                onclick="document.getElementById('modalNovoChamado').style.display='none'">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Registrar Pedido</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+    </div>
+
+
+    <!-- Seção 2: Dependentes -->
+    <section class="form-group">
+        <h2>Dependentes</h2>
+
+        <div class="field">
+            <label for="nomeDependente1">Nome do Dependente 1</label>
+            <input type="text" id="nomeDependente1" name="nomeDependente1">
+        </div>
+
+        <div class="field">
+            <label for="grauParentesco">Grau de Parentesco</label>
+            <input type="text" id="grauParentesco" name="grauParentesco" placeholder="Ex: Cà´njuge, Filho(a)">
+        </div>
+
+        <div class="field">
+            <label for="telefone">Telefone/WhatsApp do Dependente</label>
+            <input type="tel" id="telefone" name="telefone" placeholder="(00) 00000-0000">
+        </div>
+
+        <div class="field">
+            <label for="dataNascimento">Data de Nascimento do Dependente</label>
+            <input type="date" onclick="this.showPicker()" id="dataNascimento" name="dataNascimento">
+        </div>
+
+        <div class="field">
+            <label for="outrosDependentes">Outros Dependentes (Nome/Parentesco/Nasc)</label>
+            <textarea id="outrosDependentes" name="outrosDependentes" rows="4"
+                placeholder="Liste outros dependentes aqui..."></textarea>
+        </div>
+    </section>
+
+    <!-- Seção 3: Animais de Estimação -->
+    <section class="form-group">
+        <h2>Animais de Estimação</h2>
+
+        <div class="field">
+            <label>Possui animal no PNR? *</label>
+            <div class="radio-group">
+                <label class="radio-label">
+                    <input type="radio" name="possuiAnimal" value="Sim" required>
+                    <span>Sim</span>
+                </label>
+                <label class="radio-label">
+                    <input type="radio" name="possuiAnimal" value="Não" required>
+                    <span>Não</span>
+                </label>
+            </div>
+            <span class="error-message"></span>
+        </div>
+
+        <div class="field" id="animalFields" style="display: none;">
+            <div class="field">
+                <label for="especie">Espécie</label>
+                <select id="especie" name="especie">
+                    <option value="">Selecione...</option>
+                    <option value="Cão">Cão</option>
+                    <option value="Gato">Gato</option>
+                    <option value="Outro">Outro</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="nomeAnimal">Nome do Animal</label>
+                <input type="text" id="nomeAnimal" name="nomeAnimal">
+            </div>
+
+            <div class="field">
+                <label for="vacinacao">Vacinação</label>
+                <select id="vacinacao" name="vacinacao">
+                    <option value="">Selecione...</option>
+                    <option value="Em dia">1. Em dia</option>
+                    <option value="Pendente">2. Pendente</option>
+                </select>
+            </div>
+        </div>
+    </section>
+
+    <!-- Seção 4: Termo de Compromisso -->
+    <section class="form-group">
+        <h2>Termo de Compromisso</h2>
+
+        <div class="field">
+            <label>Declaro estar ciente: *</label>
+            <div class="checkbox-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="termo1" value="Normas do PNR" required>
+                    <span>Das normas e regulamentos do PNR</span>
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" name="termo2" value="Responsabilidade pelos dependentes" required>
+                    <span>Da minha responsabilidade pelos dependentes cadastrados</span>
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" name="termo3" value="Responsabilidade pelos animais" required>
+                    <span>Da minha responsabilidade pelos animais de estimação</span>
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" name="termo4" value="Atualização de dados" required>
+                    <span>Do compromisso de manter os dados atualizados</span>
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" name="termo5" value="Veracidade das informações" required>
+                    <span>Da veracidade das informações prestadas</span>
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" name="termo6" value="Penalidades" required>
+                    <span>Das penalidades em caso de descumprimento</span>
+                </label>
+            </div>
+            <span class="error-message"></span>
+        </div>
+    </section>
+
+    <div id="validationErrors" class="validation-errors" style="display: none;">
+        <h3>âš ï¸ Campos obrigatórios não preenchidos:</h3>
+        <ul id="errorList"></ul>
+    </div>
+
+    <button type="submit" class="submit-btn">ðŸ“¤ Enviar Cadastro</button>
+    </form>
+    </div>
+
+    <!-- Seção de Resumo (oculta inicialmente) -->
+    <div id="summarySection" class="summary-section" style="display: none;">
+        <div class="success-header">
+            <div class="success-icon">âœ“</div>
+            <h2>Cadastro Enviado com Sucesso!</h2>
+            <p>Confira abaixo as informações enviadas:</p>
+        </div>
+
+        <div id="summaryContent" class="summary-content"></div>
+
+        <button onclick="resetForm()" class="reset-btn">Enviar Novo Cadastro</button>
+    </div>
+    </div>
+    </section>
+
+    </main>
+    </div>
+    <!-- Gerador de PDF e Polyfills para Android 4.4 / Navegadores Antigos -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/core-js/3.33.1/minified.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/regenerator-runtime/0.14.0/runtime.min.js"></script>
+    <!-- O Supabase-JS será carregado pelo CDN nativo e, com os polyfills acima, terá mais estabilidade. -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Script convertido para ES5 -->
+    <script src="script-legacy.js"></script>
+
+    <!-- Modal Alterar Senha Dashboard -->
+    <div id="modalSenhaDashboard" class="modal-overlay"
+        style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+        <div class="modal-content glass-panel"
+            style="max-width: 400px; text-align: center; padding: 25px; border-radius: 12px; background: rgba(255,255,255,0.95); position:relative;">
+            <button onclick="fecharModalSenhaDashboard()"
+                style="position:absolute; top: 10px; right: 15px; background: transparent; border:none; font-size:1.2rem; cursor:pointer;"><i
+                    class="ri-close-line"></i></button>
+            <h3 style="color: var(--primary-color); margin-bottom: 10px;"><i class="ri-lock-password-line"></i> Alterar
+                Senha</h3>
+            <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;">Insira sua nova senha abaixo.
+                Ela substituirá a senha atual imediatamente.</p>
+            <div class="input-group" style="position:relative; margin-bottom:10px;">
+                <i class="ri-lock-line"
+                    style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+                <input type="password" id="novaSenhaInputDash" placeholder="Nova Senha (min 6 chars)"
+                    style="width: 100%; padding: 12px 40px; border-radius: 8px; border: 1px solid var(--glass-border);"
+                    required>
+                <i class="ri-eye-line" id="toggleD1"
+                    style="position:absolute; left: auto !important; right: 15px !important; top: 50%; transform: translateY(-50%); cursor: pointer; z-index: 100; pointer-events: all; pointer-events: auto; color: var(--text-muted);"
+                    onclick="togglePwd('novaSenhaInputDash', 'toggleD1')"></i>
+            </div>
+            <div class="input-group" style="position:relative; margin-bottom:15px;">
+                <i class="ri-lock-line"
+                    style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+                <input type="password" id="novaSenhaInputDashConf" placeholder="Confirme a nova senha"
+                    style="width: 100%; padding: 12px 40px; border-radius: 8px; border: 1px solid var(--glass-border);"
+                    required>
+                <i class="ri-eye-line" id="toggleD2"
+                    style="position:absolute; left: auto !important; right: 15px !important; top: 50%; transform: translateY(-50%); cursor: pointer; z-index: 100; pointer-events: all; pointer-events: auto; color: var(--text-muted);"
+                    onclick="togglePwd('novaSenhaInputDashConf', 'toggleD2')"></i>
+            </div>
+            <button id="btnConfirmaNovaSenha" class="btn btn-primary" onclick="confirmarMudarSenhaDashboard()"
+                style="width: 100%; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; z-index: 100; pointer-events: all; pointer-events: auto; border: none;">Salvar
+                Modificação</button>
+        </div>
+    </div>
+
+
+    <!-- Modal Novo Morador (Sindico) -->
+    <div id="modalNovoMorador" class="modal-overlay" style="display:none; z-index: 2000;">
+        <div class="modal-content glass-panel" style="max-width: 400px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>Cadastro Rápido de Morador</h3>
+                <i class="ri-close-line" style="cursor:pointer; font-size:1.5rem;"
+                    onclick="document.getElementById('modalNovoMorador').style.display='none'"></i>
+            </div>
+            <form id="formNovoMoradorSindico" onsubmit="salvarMoradorSindico(event)">
+                <div class="form-group mb-3">
+                    <label>NIP</label>
+                    <input type="text" id="novoMoradorNip" class="form-control"
+                        style="width:100%; border-radius:8px; border:1px solid var(--glass-border); padding:10px;"
+                        required>
+                </div>
+                <div class="form-group mb-3">
+                    <label>Nome Completo</label>
+                    <input type="text" id="novoMoradorNome" class="form-control"
+                        style="width:100%; border-radius:8px; border:1px solid var(--glass-border); padding:10px;"
+                        required>
+                </div>
+                <div class="form-group mb-3">
+                    <label>Endereço / PNR</label>
+                    <select id="novoMoradorEndereco" class="form-control"
+                        style="width:100%; border-radius:8px; border:1px solid var(--glass-border); padding:10px;"
+                        required>
+                        <option value="">Selecione...</option>
+                        <option value="Ed. SG Lisboa - Apto 101">Ed. SG Lisboa - Apto 101</option>
+                        <option value="Ed. SG Lisboa - Apto 102">Ed. SG Lisboa - Apto 102</option>
+                        <option value="Ed. SG Lisboa - Apto 103">Ed. SG Lisboa - Apto 103</option>
+                        <option value="Ed. SG Lisboa - Apto 104">Ed. SG Lisboa - Apto 104</option>
+                        <option value="Ed. SG Lisboa - Apto 105">Ed. SG Lisboa - Apto 105</option>
+                        <option value="Ed. SG Lisboa - Apto 106">Ed. SG Lisboa - Apto 106</option>
+                        <option value="Ed. SG Lisboa - Apto 201">Ed. SG Lisboa - Apto 201</option>
+                        <option value="Ed. SG Lisboa - Apto 202">Ed. SG Lisboa - Apto 202</option>
+                        <option value="Ed. SG Lisboa - Apto 203">Ed. SG Lisboa - Apto 203</option>
+                        <option value="Ed. SG Lisboa - Apto 204">Ed. SG Lisboa - Apto 204</option>
+                        <option value="Ed. SG Lisboa - Apto 205">Ed. SG Lisboa - Apto 205</option>
+                        <option value="Ed. SG Lisboa - Apto 206">Ed. SG Lisboa - Apto 206</option>
+                        <option value="Ed. SG Lisboa - Apto 301">Ed. SG Lisboa - Apto 301</option>
+                        <option value="Ed. SG Lisboa - Apto 302">Ed. SG Lisboa - Apto 302</option>
+                        <option value="Ed. SG Lisboa - Apto 303">Ed. SG Lisboa - Apto 303</option>
+                        <option value="Ed. SG Lisboa - Apto 304">Ed. SG Lisboa - Apto 304</option>
+                        <option value="Ed. SG Lisboa - Apto 305">Ed. SG Lisboa - Apto 305</option>
+                        <option value="Ed. SG Lisboa - Apto 306">Ed. SG Lisboa - Apto 306</option>
+                        <option value="Casa 01">Casa 01</option>
+                        <option value="Casa 02">Casa 02</option>
+                        <option value="Casa 03">Casa 03</option>
+                        <option value="Casa 04">Casa 04</option>
+                        <option value="Casa 05">Casa 05</option>
+                        <option value="Casa 06">Casa 06</option>
+                        <option value="Casa 07">Casa 07</option>
+                        <option value="Casa 08">Casa 08</option>
+                        <option value="Casa 09">Casa 09</option>
+                        <option value="Casa 10">Casa 10</option>
+                        <option value="Casa 11">Casa 11</option>
+                        <option value="Casa 12">Casa 12</option>
+                        <option value="Casa 13">Casa 13</option>
+                        <option value="Casa 14">Casa 14</option>
+                        <option value="Casa 15">Casa 15</option>
+                        <option value="Casa 16">Casa 16</option>
+                        <option value="Casa 17">Casa 17</option>
+                        <option value="Casa 18">Casa 18</option>
+                        <option value="Casa 19">Casa 19</option>
+                    </select>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">
+                    A senha provisória de acesso será <strong>marinha123</strong>.
+                </p>
+                <button type="submit" id="btnSalvarSindico" class="btn btn-primary" style="width:100%;">Salvar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Editar Morador (Sindico) -->
+    <div id="modalEditarMorador" class="modal-overlay" style="display:none; z-index: 2000;">
+        <div class="modal-content glass-panel" style="max-width: 500px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>Editar Cadastro de Morador</h3>
+                <i class="ri-close-line" style="cursor:pointer; font-size:1.5rem;"
+                    onclick="document.getElementById('modalEditarMorador').style.display='none'"></i>
+            </div>
+            <form id="formEditarMoradorSindico" onsubmit="salvarEdicaoMorador(event)">
+                <div class="form-group mb-3 mt-3">
+                    <label>NIP (Identificador único)</label>
+                    <input type="text" id="editMoradorNip" class="form-control"
+                        style="width:100%; border-radius:8px; border:1px solid var(--glass-border); padding:10px; background: #e2e8f0; cursor: not-allowed;"
+                        readonly required>
+                </div>
+                <div class="form-group mb-3">
+                    <label>Posto/Graduação</label>
+                    <select id="editMoradorPosto" class="form-control"
+                        style="width:100%; border-radius:8px; border:1px solid var(--glass-border); padding:10px;"
+                        required>
+                        <option value="">Selecione...</option>
+                        <option value="Almirante">Almirante</option>
+                        <option value="Vice-Almirante">Vice-Almirante</option>
+                        <option value="Contra-Almirante">Contra-Almirante</option>
+                        <option value="Capitão de Mar e Guerra">Capitão de Mar e Guerra</option>
+                        <option value="Capitão de Fragata">Capitão de Fragata</option>
+                        <option value="Capitão de Corveta">Capitão de Corveta</option>
+                        <option value="Capitão-Tenente">Capitão-Tenente</option>
+                        <option value="Primeiro-Tenente">Primeiro-Tenente</option>
+                        <option value="Segundo-Tenente">Segundo-Tenente</option>
+                        <option value="Guarda-Marinha">Guarda-Marinha</option>
+                        <option value="Suboficial">Suboficial</option>
+                        <option value="Primeiro-Sargento">Primeiro-Sargento</option>
+                        <option value="Segundo-Sargento">Segundo-Sargento</option>
+                        <option value="Terceiro-Sargento">Terceiro-Sargento</option>
+                        <option value="Cabo">Cabo</option>
+                        <option value="Marinheiro">Marinheiro</option>
+                    </select>
+                </div>
+                <div class="form-group mb-3">
+                    <label>Nome Completo</label>
+                    <input type="text" id="editMoradorNome" class="form-control"
+                        style="width:100%; border-radius:8px; border:1px solid var(--glass-border); padding:10px;"
+                        required>
+                </div>
+                <div class="form-group mb-3">
+                    <label>Endereço / PNR</label>
+                    <input type="text" id="editMoradorEndereco" class="form-control"
+                        style="width:100%; border-radius:8px; border:1px solid var(--glass-border); padding:10px;"
+                        required>
+                </div>
+                <div class="form-group mb-3" style="display:flex; justify-content:space-between; gap:10px;">
+                    <div style="width: 100%;">
+                        <label>Dependentes?</label>
+                        <select id="editMoradorDependentes" class="form-control"
+                            style="width:100%; border-radius:8px; border:1px solid var(--glass-border); padding:10px;">
+                            <option value="Sim">Sim</option>
+                            <option value="Não">Não</option>
+                        </select>
+                    </div>
+                    <div style="width: 100%;">
+                        <label>Animais?</label>
+                        <select id="editMoradorAnimais" class="form-control"
+                            style="width:100%; border-radius:8px; border:1px solid var(--glass-border); padding:10px;">
+                            <option value="Cão">Cão</option>
+                            <option value="Gato">Gato</option>
+                            <option value="Outro">Outro</option>
+                            <option value="Nenhum">Nenhum</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" id="btnSalvarEdicaoMorador" class="btn btn-primary" style="width:100%; padding: 12px; margin-top: 10px;">Salvar Alterações</button>
+            </form>
+        </div>
+    </div>
+
+</body>
+
+</html>
