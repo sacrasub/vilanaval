@@ -674,11 +674,7 @@ async function initCalendar() {
     let reservasData = await getStorageData('vnt_reservas');
     if (typeof reservasData === 'object') reservasData = JSON.stringify(reservasData);
     if (!reservasData) {
-        // Mock default if none exist
-        reservasData = JSON.stringify([
-            { id: "1", espaco: "clube", espacoNome: "Clube da Vila", data: new Date().toISOString().split('T')[0], horaInicio: "10:00", horaFim: "18:00", status: "aprovado" }
-        ]);
-        await setStorageData('vnt_reservas', JSON.parse(reservasData));
+        reservasData = "[]";
     }
 
     calendar = new FullCalendar.Calendar(calendarEl, {
