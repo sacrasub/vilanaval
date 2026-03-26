@@ -190,6 +190,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             'chamados': 'Meus Chamados (Anexo J)',
             'admin-chamados': 'Gestão de Chamados',
             'admin-pnrs': 'Cadastro de PNRs',
+            'admin-lista': 'Cadastros e Autenticações',
             'admin': 'Administração (Síndico)'
         };
 
@@ -295,7 +296,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     // loadAdminStats();
                 } else if (targetId === 'admin-chamados' || targetId === 'chamados') {
                     renderChamados(targetId === 'admin-chamados');
-                } else if (targetId === 'admin-pnrs') {
+                } else if (targetId === 'admin-pnrs' || targetId === 'admin-lista') {
                     if (typeof renderMoradores === 'function') setTimeout(() => renderMoradores(), 100);
                 } else if (targetId === 'reservas') {
                     if (typeof initCalendar === 'function') {
@@ -656,6 +657,49 @@ async function renderMoradores() {
     let btnVago = document.getElementById('badgeOcupado');
     if (btnOcupado) btnOcupado.innerText = 'Ocupado: ' + ocupadoCount;
     if (btnVago) btnVago.innerText = 'Vago (Taxa União): ' + vagoCount;
+    
+    // Tabela Administrativa em Lista Detalhada
+    const tbLista = document.getElementById('listaMoradoresAdmin');
+    if (tbLista) {
+        let sortedMoradores = [...moradores].sort((a,b) => {
+             let statusA = a.statusVerificacao || 'Pendente';
+             let statusB = b.statusVerificacao || 'Pendente';
+             if (statusA === statusB) return 0;
+             return statusA === 'Pendente' ? -1 : 1;
+        });
+        
+        let tbHtml = sortedMoradores.map(m => {
+            if (!m || !m.dadosPessoais || !m.dadosPessoais.nip) return '';
+            const nipStr = m.dadosPessoais.nip;
+            if (nipStr === 'sindico' || nipStr === 'sistema') return '';
+            
+            const status = m.statusVerificacao || 'Pendente';
+            const statusBadge = status === 'Verificado' 
+                ? '<span class="badge" style="background:#c6f6d5; color:#22543d; border: 1px solid #9ae6b4;"><i class="ri-verified-badge-fill"></i> Verificado</span>'
+                : '<span class="badge" style="background:#fefcbf; color:#975a16; border: 1px solid #faf089;"><i class="ri-error-warning-fill"></i> Pendente</span>';
+                
+            let strAction = '';
+            if (status !== 'Verificado') {
+                 strAction += `<button class="btn btn-sm btn-outline" title="Autenticar Cadastro" onclick="autenticarMorador('${nipStr}')"><i class="ri-check-double-line" style="color:#38a169;"></i></button> `;
+            }
+            strAction += `<button class="btn btn-sm btn-outline" title="Editar" onclick="abrirModalEditarMorador('${nipStr}')"><i class="ri-pencil-line" style="color:#3182ce;"></i></button> `;
+            strAction += `<button class="btn btn-sm btn-outline" title="Apagar" onclick="apagarMorador('${nipStr}')"><i class="ri-delete-bin-line" style="color:#e53e3e;"></i></button>`;
+
+            return `
+            <tr style="border-bottom: 1px solid rgba(0,0,0,0.05); transition: background 0.2s;">
+                <td style="padding: 12px; font-family: monospace; font-size: 1.1em; color: var(--primary);">${nipStr}</td>
+                <td style="padding: 12px;"><strong>${m.dadosPessoais.posto}</strong> ${m.dadosPessoais.nomeCompleto}</td>
+                <td style="padding: 12px;">${m.dadosPessoais.endereco || m.dadosPessoais.enderecoPnr}</td>
+                <td style="padding: 12px;">${statusBadge}</td>
+                <td style="padding: 12px; text-align: right; white-space: nowrap;">${strAction}</td>
+            </tr>
+            `;
+        }).join('');
+        
+        if (!tbHtml) tbHtml = '<tr><td colspan="5" style="text-align:center; padding: 20px; color:#a0aec0;">Nenhum morador cadastrado.</td></tr>';
+        
+        tbLista.innerHTML = tbHtml;
+    }
 }
 
 setTimeout(renderMoradores, 500);
@@ -926,6 +970,48 @@ window.salvarEdicaoMorador = async function(e) {
     }
 };
 
+window.autenticarMorador = async function(nip) {
+    if (!confirm(`Tem certeza que deseja marcar o cadastro do NIP ${nip} como Verificado/Autêntico? \nIsso atesta que os dados foram conferidos pelo síndico.`)) return;
+    
+    try {
+        if (!window._supabase) {
+            alert("Erro: Conexão com Supabase não disponível.");
+            return;
+        }
+        let { data } = await window._supabase.from('moradores').select('dados').eq('nip', nip);
+        if (data && data.length > 0) {
+            let dados = data[0].dados;
+            dados.statusVerificacao = 'Verificado';
+            await window._supabase.from('moradores').update({ dados: dados }).eq('nip', nip);
+            setTimeout(() => alert("Cadastro verificado e autenticado com sucesso!"), 100);
+            if (typeof renderMoradores === 'function') renderMoradores();
+        }
+    } catch (e) {
+        alert("Erro ao validar cadastro: " + e.message);
+    }
+};
+
+window.apagarMorador = async function(nip) {
+    let confirmNum = Math.floor(1000 + Math.random() * 9000);
+    let pass = prompt(`CUIDADO: EXCLUSÃO DE DADOS PESSOAIS E PERMISSÕES.\n\nVocê está prestes a apagar o NIP: ${nip}\n\nPara confirmar a exclusão, digite o número: ${confirmNum}`);
+    
+    if (pass !== confirmNum.toString()) {
+        alert("Ação cancelada: Número de confirmação incorreto.");
+        return;
+    }
+
+    try {
+        if (!window._supabase) {
+            alert("Erro: Conexão com Supabase não disponível.");
+            return;
+        }
+        await window._supabase.from('moradores').delete().eq('nip', nip);
+        setTimeout(() => alert("Morador e todas as suas permissões foram excluídos com sucesso do banco de dados."), 100);
+        if (typeof renderMoradores === 'function') renderMoradores();
+    } catch (e) {
+        alert("Erro ao excluir: " + e.message);
+    }
+};
 
 window.shareNotice = function (title, text) {
     if (navigator.share) {
