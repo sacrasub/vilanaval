@@ -858,6 +858,10 @@ body {
     .top-header {
         padding: 15px;
         flex-direction: column;
+    }
+    .mobile-logout {
+        display: inline-flex !important;
+    }
         align-items: flex-start;
         gap: 10px;
     }

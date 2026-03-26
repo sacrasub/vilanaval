@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Limpar Dados Fictícios do Supabase</title>
+</head>
+<body style="font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 50px;">
+    <h2>Limpador de Banco de Dados - Vila Naval</h2>
+    <p>Esta ferramenta deletará todos os cadastros no banco, exceto "sindico" e o registro de sistema.</p>
+    <button id="btnLimpar" style="padding: 15px 30px; font-size: 16px; background-color: #e53e3e; color: white; border: none; border-radius: 8px; cursor: pointer;">🗑️ Limpar Banco de Dados Agora</button>
+    <pre id="log" style="margin-top: 20px; background: #f1f5f9; padding: 15px; border-radius: 5px; width: 100%; max-width: 600px; white-space: pre-wrap;"></pre>
+
+    <script>
+        const supabaseUrl = 'https://jzvoxaqhteqdfyurjlbk.supabase.co/rest/v1/moradores';
+        const apiKey = 'sb_publishable_hKgmUqtu7Wrfo1A5z0fiUg_xy4pLT9H';
+
+        document.getElementById('btnLimpar').addEventListener('click', async () => {
+            const logEl = document.getElementById('log');
+            logEl.textContent = "Iniciando limpeza...\n";
+            document.getElementById('btnLimpar').disabled = true;
+
+            const headers = {
+                'apikey': apiKey,
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=representation'
+            };
+
+            try {
+                // 1. Apagar moradores
+                logEl.textContent += "1. Removendo moradores fictícios...\n";
+                const r1 = await fetch(supabaseUrl + '?nip=not.in.(sindico,sistema)', {
+                    method: 'DELETE',
+                    headers: headers
+                });
+                
+                if (r1.ok) {
+                    logEl.textContent += "-> Sucesso!\n";
+                } else {
+                    logEl.textContent += "-> Erro ao apagar moradores: " + r1.statusText + "\n";
+                }
+
+                // 2. Resetar metadados do sistema (chamados e reservas mock)
+                logEl.textContent += "2. Resetando fila de reservas e chamados falsos...\n";
+                const r2 = await fetch(supabaseUrl + '?nip=eq.sistema', {
+                    method: 'PATCH',
+                    headers: headers,
+                    body: JSON.stringify({ dados: {} })
+                });
+
+                if (r2.ok) {
+                    logEl.textContent += "-> Sucesso!\n\nTudo pronto! Banco de dados limpo para receber apenas dados reais.";
+                } else {
+                    logEl.textContent += "-> Erro ao resetar sistema: " + r2.statusText + "\n";
+                }
+            } catch(e) {
+                logEl.textContent += "\nErro de conexão falhou. Detalhes: " + e.message;
+            }
+            
+            // Limpa o script do localStorage também
+            localStorage.removeItem('vnt_reservas');
+            localStorage.removeItem('vnt_chamados');
+            localStorage.removeItem('vnt_moradores');
+        });
+    </script>
+</body>
+</html>

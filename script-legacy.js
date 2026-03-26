@@ -128,6 +128,11 @@ document.addEventListener('DOMContentLoaded', /*#__PURE__*/_asyncToGenerator(/*#
   return _regenerator().w(function (_context4) {
     while (1) switch (_context4.n) {
       case 0:
+        // ENFORCE LOGIN
+        if (!localStorage.getItem('vnt_role') && !window.location.pathname.includes('index') && !window.location.pathname.endsWith('/')) {
+            window.location.href = 'index.html';
+        }
+        
         // Login com Supabase + Validação de Senha + NIP Masks
         loginForm = document.getElementById('loginForm');
         if (loginForm) {
@@ -1055,9 +1060,9 @@ document.addEventListener('input', function (e) {
     var val = rawVal.replace(/\D/g, '');
     if (val.length > 8) val = val.slice(0, 8);
     if (val.length > 2) {
-      val = val.replace(/^(\d{2})(\d)/, '.');
+      val = val.replace(/^(\d{2})(\d)/, '$1.$2');
       if (val.length > 7) {
-        val = val.replace(/^(\d{2})\.(\d{4})(\d)/, '..');
+        val = val.replace(/^(\d{2})\.(\d{4})(\d)/, '$1.$2.$3');
       }
     }
     e.target.value = val;

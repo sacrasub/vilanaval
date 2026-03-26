@@ -37,6 +37,15 @@ async function setStorageData(key, value) {
 // ---------------------------------
 
 document.addEventListener('DOMContentLoaded', async () => {
+    // ENFORCE LOGIN
+    const currentLoc = window.location.pathname;
+    const isLoginScreen = currentLoc.includes('index') || currentLoc.endsWith('/');
+    const currentRole = localStorage.getItem('vnt_role');
+    if (!currentRole && !isLoginScreen && !currentLoc.includes('limpar_banco')) {
+        window.location.href = 'index.html';
+        return;
+    }
+    
     // Login com Supabase + Validação de Senha + NIP Masks
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
@@ -1049,9 +1058,9 @@ document.addEventListener('input', function (e) {
         let val = rawVal.replace(/\D/g, '');
         if (val.length > 8) val = val.slice(0, 8);
         if (val.length > 2) {
-            val = val.replace(/^(\d{2})(\d)/, '.');
+            val = val.replace(/^(\d{2})(\d)/, '$1.$2');
             if (val.length > 7) {
-                val = val.replace(/^(\d{2})\.(\d{4})(\d)/, '..');
+                val = val.replace(/^(\d{2})\.(\d{4})(\d)/, '$1.$2.$3');
             }
         }
         e.target.value = val;
