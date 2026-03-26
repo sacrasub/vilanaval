@@ -770,7 +770,7 @@ body {
 }
 
 @media (max-width: 768px) {
-    .dashboard-grid {
+    .dashboard-grid, .pnr-grid, .stats-grid {
         grid-template-columns: 1fr;
     }
 
@@ -786,6 +786,98 @@ body {
 
     .doc-list li .btn {
         width: 100%;
+    }
+    
+    /* Mobile App Layout Settings */
+    .app-layout {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    /* Convert sidebar into a top scrolling horizontal tab bar */
+    .sidebar {
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 2px solid var(--glass-border);
+        padding-bottom: 5px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        flex-direction: column;
+    }
+    .sidebar-header, .user-profile {
+        display: none !important; /* Hide large logo and profile cards on small screens to save vertical space */
+    }
+    
+    .sidebar-nav {
+        display: flex;
+        flex-direction: row;
+        overflow-x: auto;
+        white-space: nowrap;
+        padding: 5px 10px;
+        -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
+    }
+    
+    /* Fix inline 'block' from display overriding flex */
+    .admin-only[style*="block"] {
+        display: flex !important;
+        flex-direction: row;
+        border-top: none !important;
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }
+    .admin-only > span {
+        display: none !important; /* hide 'Gestão' text */
+    }
+    
+    .nav-item {
+        flex: 0 0 auto;
+        flex-direction: column;
+        gap: 4px;
+        padding: 10px 15px;
+        border-left: none;
+        border-bottom: 3px solid transparent;
+        font-size: 0.75rem;
+    }
+    .nav-item.active {
+        background: rgba(10, 35, 66, 0.08);
+        border-left-color: transparent !important;
+        border-bottom-color: var(--accent);
+    }
+    .nav-item i {
+        font-size: 1.4rem;
+        margin-bottom: 2px;
+    }
+    
+    /* Main Content Adjustments */
+    .main-content {
+        overflow-y: visible;
+    }
+    .top-header {
+        padding: 15px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    /* Add a small mobile logout button since user-profile was hidden */
+    .header-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+    .content-area {
+        padding: 0 15px 20px;
+        overflow-y: visible;
+    }
+    
+    /* Modals responsive fixes */
+    .modal-content {
+        width: 95%;
+        padding: 20px;
+        max-height: 90vh;
+        overflow-y: auto;
     }
 }
 /* == FORMUL�RIO DE MORADORES CSS MIGRADO == */
