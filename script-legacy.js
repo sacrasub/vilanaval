@@ -217,6 +217,15 @@ document.addEventListener('DOMContentLoaded', /*#__PURE__*/_asyncToGenerator(/*#
                       }
                       moradorData = _data[0];
                       dados = moradorData.dados || {};
+
+                      // BLOQUEIO DE ACESSO PARA NÃO VERIFICADOS (SÓ LIBERA SE STATUS FOR 'Verificado')
+                      if (dados.statusVerificacao !== 'Verificado') {
+                        alert("Acesso Negado! Seu cadastro ainda está 'Pendente' de liberação pela Administração da Vila Naval.");
+                        btn.innerHTML = 'Acessar <i class="ri-arrow-right-line"></i>';
+                        btn.disabled = false;
+                        return _context2.a(2);
+                      }
+
                       senhaBanco = dados.senha || 'marinha123';
                       if (!(senha !== senhaBanco)) {
                         _context2.n = 10;
@@ -1699,6 +1708,7 @@ function renderizarTabelaMoradores(lista) {
                 <td style="padding:12px;"><span class="badge" style="background:${statusColor}22; color:${statusColor}; border:1px solid ${statusColor}44;">${status}</span></td>
                 <td style="padding:12px;">
                     <div style="display:flex; gap:5px;">
+                        ${status !== 'Verificado' ? `<button class="btn btn-sm" style="background:#48bb78; color:white; border:none;" onclick="autenticarMorador('${d.nip}')" title="Verificar NIP"><i class="ri-check-double-line"></i> Liberar</button>` : ''}
                         <button class="btn btn-sm btn-outline" onclick="abrirModalEditarMorador('${d.nip}')" title="Editar"><i class="ri-pencil-line"></i></button>
                         <button class="btn btn-sm btn-outline" onclick="abrirModalHistorico('${pnr}')" title="Histórico"><i class="ri-history-line"></i></button>
                     </div>
