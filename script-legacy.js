@@ -792,7 +792,7 @@ function _renderMoradores() {
           });
           pnrGrid.innerHTML = html;
           btnOcupado = document.getElementById('badgeOcupado');
-          btnVago = document.getElementById('badgeOcupado');
+          btnVago = document.getElementById('badgeVago');
           if (btnOcupado) btnOcupado.innerText = 'Ocupado: ' + ocupadoCount;
           if (btnVago) btnVago.innerText = 'Vago (Taxa União): ' + vagoCount;
         case 6:
