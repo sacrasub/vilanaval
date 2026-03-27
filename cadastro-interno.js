@@ -164,7 +164,7 @@ async function submitFormData(form) {
 
         // Enviar para SUPABASE (integração com o Dashboard Vila Naval)
         if (window._supabase) {
-            const nipToSave = formData.dadosPessoais.nip.toLowerCase().trim();
+            const nipToSave = formData.dadosPessoais.nip.replace(/\D/g, '');
             
             // Verifica se o morador já possui registro na Vila Naval (pelo NIP)
             const { data: searchResults, error: searchError } = await window._supabase.from('moradores').select('id, dados').eq('nip', nipToSave);

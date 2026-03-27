@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', /*#__PURE__*/_asyncToGenerator(/*#
                   while (1) switch (_context2.p = _context2.n) {
                     case 0:
                       e.preventDefault();
-                      nip = document.getElementById('nip').value.toLowerCase();
+                      nip = document.getElementById('nip').value.replace(/\D/g, '');
                       senha = document.getElementById('senha').value;
                       btn = loginForm.querySelector("button[type='submit']");
                       btn.innerHTML = "Verificando...";
@@ -1132,7 +1132,7 @@ window.salvarMoradorSindico = /*#__PURE__*/function () {
         case 0:
           e.preventDefault();
           btn = document.getElementById('btnSalvarSindico');
-          nip = document.getElementById('novoMoradorNip').value.toLowerCase();
+          nip = document.getElementById('novoMoradorNip').value.replace(/\D/g, '');
           nome = document.getElementById('novoMoradorNome').value;
           endereco = document.getElementById('novoMoradorEndereco').value;
           if (validarNIP(nip)) {
@@ -1535,7 +1535,8 @@ window.salvarEdicaoMorador = async function(e) {
             await window.registrarHistoricoOcupacao(endereco, nip, dadosEdit.dadosPessoais.nomeCompleto, 'entrada');
         }
         if (window._supabase) {
-            const { error } = await window._supabase.from('moradores').update({ dados: dadosEdit }).eq('nip', nip);
+            const cleanNip = nip.toString().replace(/\D/g, '');
+            const { error } = await window._supabase.from('moradores').update({ dados: dadosEdit }).eq('nip', cleanNip);
             if (error) throw error;
         }
         let lblMoradores = JSON.parse(localStorage.getItem('vnt_moradores')) || [];
@@ -1654,11 +1655,12 @@ window.autenticarMorador = async function(nip) {
     if (!confirm(`Confirmar verificação do NIP ${nip}?`)) return;
     try {
         if (!window._supabase) { alert("BD offline"); return; }
-        let { data } = await window._supabase.from('moradores').select('dados').eq('nip', nip);
+        const cleanNip = nip.toString().replace(/\D/g, '');
+        let { data } = await window._supabase.from('moradores').select('dados').eq('nip', cleanNip);
         if (data && data.length > 0) {
             let dados = data[0].dados;
             dados.statusVerificacao = 'Verificado';
-            await window._supabase.from('moradores').update({ dados }).eq('nip', nip);
+            await window._supabase.from('moradores').update({ dados }).eq('nip', cleanNip);
             setTimeout(() => alert("Cadastro verificado!"), 100);
             if (typeof renderMoradores === 'function') renderMoradores();
             if (typeof carregarListaMoradores === 'function') carregarListaMoradores();
@@ -1672,12 +1674,13 @@ window.apagarMorador = async function(nip) {
     if (pass !== confirmNum.toString()) { alert("Cancelado: número incorreto."); return; }
     try {
         if (!window._supabase) { alert("BD offline"); return; }
-        let { data } = await window._supabase.from('moradores').select('dados').eq('nip', nip);
+        const cleanNip = nip.toString().replace(/\D/g, '');
+        let { data } = await window._supabase.from('moradores').select('dados').eq('nip', cleanNip);
         if (data && data.length > 0) {
             let pnr = data[0].dados.dadosPessoais.endereco || data[0].dados.dadosPessoais.enderecoPnr;
-            if (pnr) await window.registrarHistoricoOcupacao(pnr, nip, data[0].dados.dadosPessoais.nomeCompleto, 'saida');
+            if (pnr) await window.registrarHistoricoOcupacao(pnr, cleanNip, data[0].dados.dadosPessoais.nomeCompleto, 'saida');
         }
-        await window._supabase.from('moradores').delete().eq('nip', nip);
+        await window._supabase.from('moradores').delete().eq('nip', cleanNip);
         setTimeout(() => alert("Excluído com sucesso!"), 100);
         if (typeof renderMoradores === 'function') renderMoradores();
         if (typeof carregarListaMoradores === 'function') carregarListaMoradores();
