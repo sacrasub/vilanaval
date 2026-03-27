@@ -1631,6 +1631,7 @@ window.autenticarMorador = async function(nip) {
             await window._supabase.from('moradores').update({ dados }).eq('nip', nip);
             setTimeout(() => alert("Cadastro verificado!"), 100);
             if (typeof renderMoradores === 'function') renderMoradores();
+            if (typeof carregarListaMoradores === 'function') carregarListaMoradores();
         }
     } catch(e) { alert("Erro: " + e.message); }
 };
@@ -1705,7 +1706,14 @@ function renderizarTabelaMoradores(lista) {
                 <td style="padding:12px;">${d.nip}</td>
                 <td style="padding:12px;">${pnr}</td>
                 <td style="padding:12px;">${animal}</td>
-                <td style="padding:12px;"><span class="badge" style="background:${statusColor}22; color:${statusColor}; border:1px solid ${statusColor}44;">${status}</span></td>
+                <td style="padding:12px;">
+                    <span class="badge" 
+                          style="background:${statusColor}22; color:${statusColor}; border:1px solid ${statusColor}44; cursor:${status !== 'Verificado' ? 'pointer' : 'default'};"
+                          onclick="${status !== 'Verificado' ? `autenticarMorador('${d.nip}')` : ''}"
+                          title="${status !== 'Verificado' ? 'Clique para liberar acesso deste morador' : 'Cadastro já verificado'}">
+                        ${status}
+                    </span>
+                </td>
                 <td style="padding:12px;">
                     <div style="display:flex; gap:5px;">
                         ${status !== 'Verificado' ? `<button class="btn btn-sm" style="background:#48bb78; color:white; border:none;" onclick="autenticarMorador('${d.nip}')" title="Verificar NIP"><i class="ri-check-double-line"></i> Liberar</button>` : ''}
