@@ -514,6 +514,34 @@
                     </div>
                 </section>
 
+                <!-- Admin: Lista de Moradores -->
+                <section id="admin-lista" class="tab-pane">
+                    <div class="card glass-panel">
+                        <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                            <h3><i class="ri-list-check"></i> Lista de Moradores</h3>
+                            <input type="text" id="buscaMorador" placeholder="🔍 Buscar por nome, NIP ou PNR..." oninput="filtrarListaMoradores()" style="padding:8px 12px; border-radius:8px; border:1px solid #e2e8f0; font-size:0.9rem; min-width:220px;">
+                        </div>
+                        <div class="card-body" style="overflow-x:auto;">
+                            <table id="tabelaMoradores" style="width:100%; border-collapse:collapse; font-size:0.9rem;">
+                                <thead>
+                                    <tr style="background:#0a2342; color:white; text-align:left;">
+                                        <th style="padding:10px 12px;">Posto/Grad.</th>
+                                        <th style="padding:10px 12px;">Nome</th>
+                                        <th style="padding:10px 12px;">NIP</th>
+                                        <th style="padding:10px 12px;">PNR</th>
+                                        <th style="padding:10px 12px;">Animais</th>
+                                        <th style="padding:10px 12px;">Status</th>
+                                        <th style="padding:10px 12px;">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="listaMoradoresBody">
+                                    <tr><td colspan="7" style="padding:20px; text-align:center; color:#718096;">Carregando...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
             <!-- Admin: Relatório do Síndico -->
             <section id="relatorio-sindico" class="tab-pane">
                 <div class="card glass-panel" id="relatorio-h">

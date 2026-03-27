@@ -382,6 +382,7 @@ document.addEventListener('DOMContentLoaded', /*#__PURE__*/_asyncToGenerator(/*#
           'chamados': 'Meus Chamados (Anexo J)',
           'admin-chamados': 'Gestão de Chamados',
           'admin-pnrs': 'Cadastro de PNRs',
+          'admin-lista': 'Lista de Moradores',
           'admin': 'Administração (Síndico)'
         }; // Chamados Logic
         chamadosKey = 'vnt_chamados';
@@ -431,6 +432,10 @@ document.addEventListener('DOMContentLoaded', /*#__PURE__*/_asyncToGenerator(/*#
               if (typeof renderMoradores === 'function') setTimeout(function () {
                 return renderMoradores();
               }, 100);
+            } else if (targetId === 'admin-lista') {
+              if (typeof carregarListaMoradores === 'function') {
+                carregarListaMoradores();
+              }
             } else if (targetId === 'reservas') {
               if (typeof initCalendar === 'function') {
                 setTimeout(initCalendar, 50);
@@ -1635,5 +1640,85 @@ window.apagarMorador = async function(nip) {
         await window._supabase.from('moradores').delete().eq('nip', nip);
         setTimeout(() => alert("Excluído com sucesso!"), 100);
         if (typeof renderMoradores === 'function') renderMoradores();
+        if (typeof carregarListaMoradores === 'function') carregarListaMoradores();
     } catch(e) { alert("Erro: " + e.message); }
 };
+
+// ====== LISTA DE MORADORES COMPLETA ====== //
+window.carregarListaMoradores = async function() {
+    const tableBody = document.getElementById('listaMoradoresBody');
+    if (!tableBody) return;
+    
+    tableBody.innerHTML = '<tr><td colspan="7" style="padding:20px; text-align:center;">🔍 Carregando dados...</td></tr>';
+    
+    let moradores = [];
+    try {
+        if (window._supabase) {
+            const { data, error } = await window._supabase.from('moradores').select('dados');
+            if (data) {
+                moradores = data.filter(d => d.dados && d.dados.dadosPessoais && d.dados.dadosPessoais.nip !== 'sistema').map(d => d.dados);
+            }
+        }
+        
+        if (moradores.length === 0) {
+            moradores = JSON.parse(localStorage.getItem('vnt_moradores')) || [];
+            moradores = moradores.filter(m => m.dadosPessoais && m.dadosPessoais.nip !== 'sistema');
+        }
+        
+        // Guardar para busca offline
+        window._cacheMoradores = moradores;
+        renderizarTabelaMoradores(moradores);
+        
+    } catch (err) {
+        console.error("Erro ao carregar lista de moradores:", err);
+        tableBody.innerHTML = '<tr><td colspan="7" style="padding:20px; text-align:center; color:red;">Erro ao carregar dados.</td></tr>';
+    }
+};
+
+function renderizarTabelaMoradores(lista) {
+    const tableBody = document.getElementById('listaMoradoresBody');
+    if (lista.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="7" style="padding:20px; text-align:center; color:#718096;">Nenhum morador encontrado.</td></tr>';
+        return;
+    }
+    
+    tableBody.innerHTML = lista.map(m => {
+        const d = m.dadosPessoais;
+        const pnr = d.endereco || d.enderecoPnr || '-';
+        const animal = m.animais && m.animais.possuiAnimal === 'Sim' ? m.animais.especie : 'Não';
+        const status = m.statusVerificacao || 'Pendente';
+        const statusColor = status === 'Verificado' ? '#48bb78' : '#ed8936';
+        
+        return `
+            <tr style="border-bottom: 1px solid #edf2f7; hover: background-color: #f7fafc;">
+                <td style="padding:12px;">${d.posto}</td>
+                <td style="padding:12px; font-weight:600;">${d.nomeCompleto}</td>
+                <td style="padding:12px;">${d.nip}</td>
+                <td style="padding:12px;">${pnr}</td>
+                <td style="padding:12px;">${animal}</td>
+                <td style="padding:12px;"><span class="badge" style="background:${statusColor}22; color:${statusColor}; border:1px solid ${statusColor}44;">${status}</span></td>
+                <td style="padding:12px;">
+                    <div style="display:flex; gap:5px;">
+                        <button class="btn btn-sm btn-outline" onclick="abrirModalEditarMorador('${d.nip}')" title="Editar"><i class="ri-pencil-line"></i></button>
+                        <button class="btn btn-sm btn-outline" onclick="abrirModalHistorico('${pnr}')" title="Histórico"><i class="ri-history-line"></i></button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+window.filtrarListaMoradores = function() {
+    const termo = document.getElementById('buscaMorador').value.toLowerCase();
+    if (!window._cacheMoradores) return;
+    
+    const filtrados = window._cacheMoradores.filter(m => {
+        const d = m.dadosPessoais;
+        return d.nomeCompleto.toLowerCase().includes(termo) || 
+               d.nip.toLowerCase().includes(termo) || 
+               (d.endereco || d.enderecoPnr || '').toLowerCase().includes(termo);
+    });
+    
+    renderizarTabelaMoradores(filtrados);
+};
+
