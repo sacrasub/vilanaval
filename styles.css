@@ -652,6 +652,12 @@ body {
 
 .admin-only {
     display: none;
+    flex-direction: column;
+}
+.sidebar-footer {
+    display: flex;
+    flex-direction: column;
+    margin-top: auto;
 }
 
 /* Hidden by default until sindico logs in */
@@ -820,7 +826,7 @@ body {
         -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
     }
     
-    /* Fix inline 'block' from display overriding flex */
+    /* Fix inline 'block' from display overriding flex - MOBILE ONLY */
     .admin-only[style*="block"] {
         display: flex !important;
         flex-direction: row;
