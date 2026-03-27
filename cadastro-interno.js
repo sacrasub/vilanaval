@@ -163,21 +163,21 @@ async function submitFormData(form) {
         });
 
         // Enviar para SUPABASE (integração com o Dashboard Vila Naval)
-        if (_supabase) {
+        if (window._supabase) {
             const nipToSave = formData.dadosPessoais.nip.toLowerCase().trim();
             
             // Verifica se o morador já possui registro na Vila Naval (pelo NIP)
-            const { data: searchResults, error: searchError } = await _supabase.from('moradores').select('id, dados').eq('nip', nipToSave);
+            const { data: searchResults, error: searchError } = await window._supabase.from('moradores').select('id, dados').eq('nip', nipToSave);
             
             if (searchResults && searchResults.length > 0) {
                 // Preservar a senha e outras definições internas já criadas do morador
                 let oldDados = searchResults[0].dados || {};
                 let combinedDados = { ...formData, senha: oldDados.senha || 'marinha123' };
-                await _supabase.from('moradores').update({ dados: combinedDados }).eq('nip', nipToSave);
+                await window._supabase.from('moradores').update({ dados: combinedDados }).eq('nip', nipToSave);
             } else {
                 // Se não existe, cria o novo registro padrão (c/ senha provisória padrão)
                 let newDados = { ...formData, senha: 'marinha123' };
-                await _supabase.from('moradores').insert([{ nip: nipToSave, dados: newDados }]);
+                await window._supabase.from('moradores').insert([{ nip: nipToSave, dados: newDados }]);
             }
         }
 
