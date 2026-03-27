@@ -1360,3 +1360,52 @@ window.imprimirFichaCadastro = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_rege
     }
   }, _callee9);
 }));
+
+
+// Lógica de Estatísticas do Dashboard (Dinâmico)
+window.carregarEstatisticasDashboard = async function() {
+    try {
+        if (!window._supabase) return;
+        
+        let ocupadas = 0;
+        let totalValidos = 0;
+        const totalCasas = 37; // Total PNRs
+
+        const { data: moradores, error } = await window._supabase.from('moradores').select('dados');
+        if (!error && moradores) {
+            moradores.forEach(m => {
+                // Filtramos "sindico" e "sistema" exigindo um endereço válido preenchido
+                if (m.dados && m.dados.dadosPessoais && m.dados.dadosPessoais.endereco) {
+                    totalValidos++;
+                    ocupadas++;
+                }
+            });
+        }
+        
+        let totalReservasAtivas = 0;
+        try {
+            const reservasRaw = localStorage.getItem('vnt_reservas');
+            if (reservasRaw) {
+                const reservasArr = JSON.parse(reservasRaw);
+                const hoje = new Date().toISOString().split('T')[0];
+                totalReservasAtivas = reservasArr.filter(r => r.data >= hoje && (r.status === 'Confirmada' || r.status === 'Pendente')).length;
+            }
+        } catch(e) {}
+
+        const elTotal = document.getElementById('statTotalMoradores');
+        const elCasas = document.getElementById('statCasasOcupadas');
+        const elReser = document.getElementById('statReservas');
+
+        if (elTotal) elTotal.innerText = totalValidos;
+        if (elCasas) elCasas.innerText = Math.round((ocupadas / totalCasas) * 100) + '%';
+        if (elReser) elReser.innerText = totalReservasAtivas;
+
+    } catch(e) {
+        console.error("Erro ao carregar estatísticas do dashboard:", e);
+    }
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Aguarda leve delay para garantir Supabase JS load
+    setTimeout(window.carregarEstatisticasDashboard, 500);
+});
