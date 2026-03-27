@@ -131,6 +131,7 @@ async function submitFormData(form) {
         const dataToSend = {
             posto: formData.dadosPessoais.posto,
             nomeCompleto: formData.dadosPessoais.nomeCompleto,
+            nomeGuerra: formData.dadosPessoais.nomeGuerra,
             nip: formData.dadosPessoais.nip,
             dataNascimentoTitular: formData.dadosPessoais.dataNascimentoTitular,
             cpf: formData.dadosPessoais.cpf,
@@ -231,6 +232,7 @@ function collectFormData(form) {
         dadosPessoais: {
             posto: form.posto.value,
             nomeCompleto: form.nomeCompleto.value,
+            nomeGuerra: form.nomeGuerra.value,
             nip: form.nip.value,
             dataNascimentoTitular: form.dataNascimentoTitular.value,
             cpf: form.cpf.value || 'Não informado',

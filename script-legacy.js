@@ -1153,6 +1153,7 @@ window.salvarMoradorSindico = /*#__PURE__*/function () {
           _context7.p = 3;
           mockData = {
             nomeCompleto: nome,
+            nomeGuerra: 'N/A', // O sindico não preenche isso no form rápido
             nip: nip,
             endereco: endereco,
             senha: 'marinha123',
@@ -1467,6 +1468,7 @@ window.abrirModalEditarMorador = async function(nip) {
     document.getElementById('editMoradorNip').value = p.nip || '';
     document.getElementById('editMoradorPosto').value = p.posto || '';
     document.getElementById('editMoradorNome').value = p.nomeCompleto || '';
+    document.getElementById('editMoradorNomeGuerra').value = p.nomeGuerra || '';
     document.getElementById('editMoradorNasc').value = p.dataNascimentoTitular || '';
     document.getElementById('editMoradorCpf').value = p.cpf || '';
     document.getElementById('editMoradorEndereco').value = p.endereco || p.enderecoPnr || '';
@@ -1504,6 +1506,7 @@ window.salvarEdicaoMorador = async function(e) {
         // 1. DADOS PESSOAIS
         dadosEdit.dadosPessoais.posto = document.getElementById('editMoradorPosto').value;
         dadosEdit.dadosPessoais.nomeCompleto = document.getElementById('editMoradorNome').value;
+        dadosEdit.dadosPessoais.nomeGuerra = document.getElementById('editMoradorNomeGuerra').value;
         dadosEdit.dadosPessoais.dataNascimentoTitular = document.getElementById('editMoradorNasc').value;
         dadosEdit.dadosPessoais.cpf = document.getElementById('editMoradorCpf').value;
         
@@ -1771,5 +1774,20 @@ window.filtrarListaMoradores = function() {
     });
     
     renderizarTabelaMoradores(filtrados);
+};
+
+window.togglePwd = function(id, iconId) {
+    var input = document.getElementById(id);
+    var icon = document.getElementById(iconId);
+    if (!input || !icon) return;
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('ri-eye-line');
+        icon.classList.add('ri-eye-off-line');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('ri-eye-off-line');
+        icon.classList.add('ri-eye-line');
+    }
 };
 
