@@ -875,7 +875,7 @@
     <!-- O Supabase-JS será carregado pelo CDN nativo e, com os polyfills acima, terá mais estabilidade. -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Script convertido para ES5 -->
-    <script src="script-legacy.js"></script>
+    <script src="script-legacy.js?v=historico1"></script>
 
     <!-- Modal de Termos -->
     <div id="modalTermos" class="modal-overlay" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
@@ -1094,8 +1094,63 @@
         </div>
     </div>
 
+    <!-- Modal Histórico PNR e Ocorrências -->
+    <div id="modalHistorico" class="modal-overlay" style="display:none; z-index: 2000;">
+        <div class="modal-content glass-panel" style="max-width: 600px; max-height: 90vh; overflow-y: auto;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3><i class="ri-history-line"></i> Histórico do PNR: <span id="histPnrTitle"></span></h3>
+                <i class="ri-close-line" style="cursor:pointer; font-size:1.5rem;"
+                    onclick="document.getElementById('modalHistorico').style.display='none'"></i>
+            </div>
+            
+            <div class="hist-tabs" style="display:flex; gap:10px; margin-top:15px; border-bottom:1px solid #e2e8f0; padding-bottom:10px;">
+                <button class="btn btn-sm btn-primary" id="btnTabOcupacao" onclick="showHistTab('ocupacao')">Moradores</button>
+                <button class="btn btn-sm btn-outline" id="btnTabOcorrencias" onclick="showHistTab('ocorrencias')">Ocorrências</button>
+            </div>
+
+            <!-- Tab Ocupação -->
+            <div id="tabOcupacao" style="display:block; padding-top: 15px;">
+                <div id="listHistOcupacao" style="margin-bottom: 20px;">
+                    <!-- Preenchido via JS -->
+                </div>
+            </div>
+
+            <!-- Tab Ocorrências -->
+            <div id="tabOcorrencias" style="display:none; padding-top: 15px;">
+                <form id="formNovaOcorrencia" onsubmit="salvarOcorrencia(event)" style="background: #f7fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <h4>Registrar Nova Ocorrência</h4>
+                    <input type="hidden" id="histOcorrenciaPnr">
+                    <input type="hidden" id="histOcorrenciaNip"> <!-- Optional NIP vinculado -->
+                    
+                    <div class="form-group mb-2 mt-2">
+                        <label>Data</label>
+                        <input type="date" onclick="this.showPicker()" id="novaOcData" class="form-control" style="width:100%; border-radius:8px; border:1px solid var(--glass-border); padding:8px;" required>
+                    </div>
+                    <div class="form-group mb-2">
+                        <label>Motivo</label>
+                        <input type="text" id="novaOcMotivo" placeholder="Ex: Vazamento, Reclamação" class="form-control" style="width:100%; border-radius:8px; border:1px solid var(--glass-border); padding:8px;" required>
+                    </div>
+                    <div class="form-group mb-2">
+                        <label>Providência</label>
+                        <input type="text" id="novaOcProvidencia" placeholder="Ex: Substituição da peça" class="form-control" style="width:100%; border-radius:8px; border:1px solid var(--glass-border); padding:8px;" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label>Observação</label>
+                        <textarea id="novaOcObs" rows="2" class="form-control" style="width:100%; border-radius:8px; border:1px solid var(--glass-border); padding:8px;"></textarea>
+                    </div>
+                    <button type="submit" id="btnSalvarOcorrencia" class="btn btn-primary" style="width:100%;">Salvar Registro</button>
+                </form>
+
+                <div id="listHistOcorrencias">
+                    <!-- Preenchido via JS -->
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
     <!-- Script de submissão do formulário interno de moradores -->
-    <script src="cadastro-interno.js"></script>
+    <script src="cadastro-interno.js?v=historico1"></script>
 </body>
 
 </html>

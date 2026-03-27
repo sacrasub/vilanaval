@@ -58,91 +58,98 @@ document.addEventListener('DOMContentLoaded', async () => {
             btn.innerHTML = "Verificando...";
             btn.disabled = true;
 
-            // Checagem Dinamica do Sindico
-            if (nip === 'sindico' || nip.includes('admin')) {
-                let validPwd = 'sindico';
-                try {
-                    if (window._supabase) {
-                        const { data, error } = await window._supabase.from('moradores').select('dados').eq('nip', 'sindico');
-                        if (data && data.length > 0 && data[0].dados && data[0].dados.senha) {
-                            validPwd = data[0].dados.senha.trim();
+            try {
+                // Checagem Dinamica do Sindico
+                if (nip === 'sindico' || nip.includes('admin')) {
+                    let validPwd = 'sindico';
+                    try {
+                        if (window._supabase) {
+                            const { data, error } = await window._supabase.from('moradores').select('dados').eq('nip', 'sindico');
+                            if (data && data.length > 0 && data[0].dados && data[0].dados.senha) {
+                                validPwd = data[0].dados.senha.trim();
+                            }
                         }
+                    } catch (e) {
+                        console.error("Erro consultando supabase para sindico:", e);
                     }
-                } catch (e) {
-                    console.error("Erro consultando supabase para sindico:", e);
-                }
-                if (senha.trim() !== validPwd) {
-                    alert("Senha do Síndico Incorreta!");
-                    btn.innerHTML = 'Acessar <i class="ri-arrow-right-line"></i>';
-                    btn.disabled = false;
-                    return;
-                }
-                localStorage.setItem('vnt_role', 'sindico');
-                localStorage.setItem('vnt_user', 'Síndico');
-                window.location.href = 'dashboard.html';
-                return;
-            }
-
-            // Validação Matemática do DV da Marinha antes de bater banco
-            if (!validarNIP(nip)) {
-                alert("NIP Inválido (Regra Módulo 11)! Verifique o Dígito Verificador inserido.");
-                btn.innerHTML = 'Acessar <i class="ri-arrow-right-line"></i>';
-                btn.disabled = false;
-                return;
-            }
-
-            // Supabase Check
-            if (window._supabase) {
-                const { data, error } = await window._supabase.from('moradores').select('*').eq('nip', nip);
-
-                if (data && data.length > 0) {
-                    const moradorData = data[0];
-                    const dados = moradorData.dados || {};
-                    const senhaBanco = dados.senha || 'marinha123';
-
-                    if (senha !== senhaBanco) {
-                        alert("Senha Incorreta!");
+                    if (senha.trim() !== validPwd) {
+                        alert("Senha do Síndico Incorreta!");
                         btn.innerHTML = 'Acessar <i class="ri-arrow-right-line"></i>';
                         btn.disabled = false;
                         return;
                     }
+                    localStorage.setItem('vnt_role', 'sindico');
+                    localStorage.setItem('vnt_user', 'Síndico');
+                    window.location.href = 'dashboard.html';
+                    return;
+                }
 
-                    if (senhaBanco === 'marinha123') {
-                        // FORÇA MUDANÇA DE SENHA
-                        const modal = document.getElementById('modalMudarSenha');
-                        if (modal) {
-                            modal.style.display = 'flex';
-                            document.getElementById('btnSalvarSenha').onclick = async () => {
-                                const novaSenha = document.getElementById('novaSenha').value;
-                                if (novaSenha.length < 6) {
-                                    alert("A senha deve ter no mínimo 6 caracteres para ser segura.");
-                                    return;
-                                }
-                                const btnSalvar = document.getElementById('btnSalvarSenha');
-                                btnSalvar.innerHTML = "Salvando...";
-                                btnSalvar.disabled = true;
+                // Validação Matemática do DV da Marinha antes de bater banco
+                if (!validarNIP(nip)) {
+                    alert("NIP Inválido (Regra Módulo 11)! Verifique o Dígito Verificador inserido.");
+                    btn.innerHTML = 'Acessar <i class="ri-arrow-right-line"></i>';
+                    btn.disabled = false;
+                    return;
+                }
 
-                                dados.senha = novaSenha;
-                                await window._supabase.from('moradores').update({ dados: dados }).eq('nip', nip);
+                // Supabase Check
+                if (window._supabase) {
+                    const { data, error } = await window._supabase.from('moradores').select('*').eq('nip', nip);
 
-                                localStorage.setItem('vnt_role', nip);
-                                localStorage.setItem('vnt_user', nip);
-                                window.location.href = 'dashboard.html';
-                            };
+                    if (data && data.length > 0) {
+                        const moradorData = data[0];
+                        const dados = moradorData.dados || {};
+                        const senhaBanco = dados.senha || 'marinha123';
+
+                        if (senha !== senhaBanco) {
+                            alert("Senha Incorreta!");
+                            btn.innerHTML = 'Acessar <i class="ri-arrow-right-line"></i>';
+                            btn.disabled = false;
+                            return;
+                        }
+
+                        if (senhaBanco === 'marinha123') {
+                            // FORÇA MUDANÇA DE SENHA
+                            const modal = document.getElementById('modalMudarSenha');
+                            if (modal) {
+                                modal.style.display = 'flex';
+                                document.getElementById('btnSalvarSenha').onclick = async () => {
+                                    const novaSenha = document.getElementById('novaSenha').value;
+                                    if (novaSenha.length < 6) {
+                                        alert("A senha deve ter no mínimo 6 caracteres para ser segura.");
+                                        return;
+                                    }
+                                    const btnSalvar = document.getElementById('btnSalvarSenha');
+                                    btnSalvar.innerHTML = "Salvando...";
+                                    btnSalvar.disabled = true;
+
+                                    dados.senha = novaSenha;
+                                    await window._supabase.from('moradores').update({ dados: dados }).eq('nip', nip);
+
+                                    localStorage.setItem('vnt_role', nip);
+                                    localStorage.setItem('vnt_user', nip);
+                                    window.location.href = 'dashboard.html';
+                                };
+                            }
+                        } else {
+                            // Login normal se a senha não for a de fábrica
+                            localStorage.setItem('vnt_role', nip);
+                            localStorage.setItem('vnt_user', nip);
+                            window.location.href = 'dashboard.html';
                         }
                     } else {
-                        // Login normal se a senha não for a de fábrica
-                        localStorage.setItem('vnt_role', nip);
-                        localStorage.setItem('vnt_user', nip);
-                        window.location.href = 'dashboard.html';
+                        alert("Acesso Negado! NIP não matriculado na Vila Naval. Solicite liberação na administração.");
+                        btn.innerHTML = 'Acessar <i class="ri-arrow-right-line"></i>';
+                        btn.disabled = false;
                     }
                 } else {
-                    alert("Acesso Negado! NIP não matriculado na Vila Naval. Solicite liberação na administração.");
+                    alert("Erro grave: Banco de Dados Inacessível.");
                     btn.innerHTML = 'Acessar <i class="ri-arrow-right-line"></i>';
                     btn.disabled = false;
                 }
-            } else {
-                alert("Erro grave: Banco de Dados Inacessível.");
+            } catch (err) {
+                console.error("Login Error:", err);
+                alert("Ocorreu um erro ao processar seu login. Tente novamente.");
                 btn.innerHTML = 'Acessar <i class="ri-arrow-right-line"></i>';
                 btn.disabled = false;
             }
@@ -645,7 +652,10 @@ async function renderMoradores() {
                 <div class="pnr-title"><i class="ri-home-4-fill"></i> ${pnr}</div>
                 <p class="pnr-details">Perm: ${data.dadosPessoais.posto} ${data.dadosPessoais.nomeCompleto.split(' ')[0]}</p>
                 <p class="pnr-details"><i class="ri-group-line"></i> ${dependentes} | <i class="ri-github-fill"></i> ${pets}</p>
-                <button class="btn btn-sm btn-outline mt-2" onclick="abrirModalEditarMorador('${data.dadosPessoais.nip}')" style="width:100%; border: 1px solid #1a73e8; color: #1a73e8; background: transparent; cursor: pointer; padding: 5px; border-radius: 5px;"><i class="ri-pencil-line"></i> Editar</button>
+                <div style="display:flex; gap: 5px; margin-top: 5px;">
+                    <button class="btn btn-sm btn-outline mt-2" onclick="abrirModalHistorico('${pnr}')" style="width:100%; border: 1px solid #805ad5; color: #805ad5; background: transparent; cursor: pointer; padding: 5px; border-radius: 5px;"><i class="ri-history-line"></i> Histórico</button>
+                    <button class="btn btn-sm btn-outline mt-2" onclick="abrirModalEditarMorador('${data.dadosPessoais.nip}')" style="width:100%; border: 1px solid #1a73e8; color: #1a73e8; background: transparent; cursor: pointer; padding: 5px; border-radius: 5px;"><i class="ri-pencil-line"></i> Editar</button>
+                </div>
             </div>
             `;
         } else {
@@ -655,6 +665,7 @@ async function renderMoradores() {
                 <div class="pnr-title"><i class="ri-home-x-line"></i> ${pnr}</div>
                 <p class="pnr-details text-danger"><strong>VAGO</strong></p>
                 <p class="pnr-details">Aguardando novo morador</p>
+                <button class="btn btn-sm btn-outline mt-2" onclick="abrirModalHistorico('${pnr}')" style="width:100%; border: 1px solid #805ad5; color: #805ad5; background: transparent; cursor: pointer; padding: 5px; border-radius: 5px;"><i class="ri-history-line"></i> Histórico</button>
             </div>
             `;
         }
@@ -848,6 +859,198 @@ window.printSection = function (sectionId) {
     }, 1000);
 }
 
+// ====== HISTÓRICO DE PNR E OCORRÊNCIAS ====== //
+window.showHistTab = function(tab) {
+    document.getElementById('tabOcupacao').style.display = tab === 'ocupacao' ? 'block' : 'none';
+    document.getElementById('tabOcorrencias').style.display = tab === 'ocorrencias' ? 'block' : 'none';
+    
+    document.getElementById('btnTabOcupacao').className = tab === 'ocupacao' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-outline';
+    document.getElementById('btnTabOcorrencias').className = tab === 'ocorrencias' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-outline';
+};
+
+window.carregarHistoricoPnr = async function(pnr) {
+    const listOcupacao = document.getElementById('listHistOcupacao');
+    const listOcorrencias = document.getElementById('listHistOcorrencias');
+    
+    listOcupacao.innerHTML = '<p>Carregando histórico de ocupação...</p>';
+    listOcorrencias.innerHTML = '<p>Carregando ocorrências...</p>';
+    
+    let histOcupacao = [];
+    let histOcorrencias = [];
+    
+    if (window._supabase) {
+        // Tenta buscar do Supabase
+        const { data: dataOcup } = await window._supabase.from('pnr_history').select('*').eq('pnr', pnr).order('data_entrada', { ascending: false });
+        if (dataOcup) histOcupacao = dataOcup;
+        
+        const { data: dataOcorr } = await window._supabase.from('interaction_history').select('*').eq('pnr', pnr).order('data_ocorrencia', { ascending: false });
+        if (dataOcorr) histOcorrencias = dataOcorr;
+    } else {
+        // Fallback localStorage
+        histOcupacao = (JSON.parse(localStorage.getItem('vnt_pnr_history')) || []).filter(h => h.pnr === pnr).sort((a,b) => new Date(b.data_entrada) - new Date(a.data_entrada));
+        histOcorrencias = (JSON.parse(localStorage.getItem('vnt_interaction_history')) || []).filter(h => h.pnr === pnr).sort((a,b) => new Date(b.data_ocorrencia) - new Date(a.data_ocorrencia));
+    }
+    
+    // Render Ocupação
+    if (histOcupacao.length === 0) {
+        listOcupacao.innerHTML = '<p class="text-muted">Nenhum registro de ocupação anterior encontrado.</p>';
+    } else {
+        listOcupacao.innerHTML = histOcupacao.map(h => `
+            <div style="border-left: 3px solid var(--primary-color); padding-left: 10px; margin-bottom: 15px;">
+                <p style="margin:0; font-weight:600;">${h.nome} (NIP: ${h.nip})</p>
+                <p style="margin:0; font-size:0.85rem; color:var(--text-muted);">
+                    Entrada: ${h.data_entrada ? new Date(h.data_entrada).toLocaleDateString('pt-BR', {timeZone: 'UTC'}) : '-'}
+                    | Saída: ${h.data_saida ? new Date(h.data_saida).toLocaleDateString('pt-BR', {timeZone: 'UTC'}) : 'Atual'}
+                </p>
+            </div>
+        `).join('');
+    }
+    
+    // Render Ocorrencias
+    if (histOcorrencias.length === 0) {
+        listOcorrencias.innerHTML = '<p class="text-muted">Nenhuma ocorrência registrada.</p>';
+    } else {
+        listOcorrencias.innerHTML = histOcorrencias.map(h => `
+            <div style="background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 10px;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                    <strong style="color:var(--primary-dark);">${h.motivo}</strong>
+                    <span style="font-size:0.8rem; color:var(--text-muted);">${h.data_ocorrencia ? new Date(h.data_ocorrencia).toLocaleDateString('pt-BR', {timeZone: 'UTC'}) : '-'}</span>
+                </div>
+                <p style="margin:0 0 5px 0; font-size:0.9rem;"><strong>Providência:</strong> ${h.providencia}</p>
+                ${h.observacao ? `<p style="margin:0; font-size:0.85rem; font-style:italic; color:#666;">"${h.observacao}"</p>` : ''}
+            </div>
+        `).join('');
+    }
+};
+
+window.abrirModalHistorico = async function(pnr) {
+    document.getElementById('histPnrTitle').textContent = pnr;
+    document.getElementById('histOcorrenciaPnr').value = pnr;
+    
+    // Pre-determine current NIP for the PNR based on local data
+    let currentNip = '';
+    let moradores = JSON.parse(localStorage.getItem('vnt_moradores')) || [];
+    if (window._supabase) {
+        let { data } = await window._supabase.from('moradores').select('dados');
+        if (data && data.length > 0) moradores = data.map(d => d.dados);
+    }
+    const moradorAtual = moradores.find(m => m.dadosPessoais && (m.dadosPessoais.endereco === pnr || m.dadosPessoais.enderecoPnr === pnr));
+    if (moradorAtual) {
+        currentNip = moradorAtual.dadosPessoais.nip;
+    }
+    document.getElementById('histOcorrenciaNip').value = currentNip;
+    
+    // Reset form
+    document.getElementById('formNovaOcorrencia').reset();
+    document.getElementById('novaOcData').valueAsDate = new Date();
+    
+    showHistTab('ocupacao');
+    document.getElementById('modalHistorico').style.display = 'flex';
+    
+    // Carregar os dados
+    await carregarHistoricoPnr(pnr);
+};
+
+window.salvarOcorrencia = async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnSalvarOcorrencia');
+    btn.innerHTML = 'Salvando...';
+    btn.disabled = true;
+    
+    try {
+        const pnr = document.getElementById('histOcorrenciaPnr').value;
+        const nip = document.getElementById('histOcorrenciaNip').value;
+        
+        const novaOcorrencia = {
+            id: window._supabase ? undefined : Date.now().toString(),
+            pnr: pnr,
+            nip: nip,
+            data_ocorrencia: document.getElementById('novaOcData').value,
+            motivo: document.getElementById('novaOcMotivo').value,
+            providencia: document.getElementById('novaOcProvidencia').value,
+            observacao: document.getElementById('novaOcObs').value
+        };
+        
+        if (window._supabase) {
+            await window._supabase.from('interaction_history').insert([novaOcorrencia]);
+        }
+        
+        // Simultanemente salva no localStorage
+        let histLocal = JSON.parse(localStorage.getItem('vnt_interaction_history')) || [];
+        if (!novaOcorrencia.id) novaOcorrencia.id = Date.now().toString();
+        histLocal.push(novaOcorrencia);
+        localStorage.setItem('vnt_interaction_history', JSON.stringify(histLocal));
+        
+        document.getElementById('formNovaOcorrencia').reset();
+        await carregarHistoricoPnr(pnr);
+        
+        alert('Ocorrência salva com sucesso!');
+    } catch (err) {
+        console.error(err);
+        alert('Erro ao salvar ocorrência.');
+    } finally {
+        btn.innerHTML = 'Salvar Registro';
+        btn.disabled = false;
+    }
+};
+
+window.registrarHistoricoOcupacao = async function(pnr, nip, nome, tipo) {
+    // tipo: 'entrada' ou 'saida'
+    try {
+        const dataAtual = new Date().toISOString().split('T')[0];
+        
+        if (tipo === 'entrada') {
+            const novoRegistro = {
+                id: window._supabase ? undefined : Date.now().toString(),
+                pnr: pnr,
+                nip: nip,
+                nome: nome,
+                data_entrada: dataAtual,
+                data_saida: null
+            };
+            
+            if (window._supabase) {
+                await window._supabase.from('pnr_history').insert([novoRegistro]);
+            }
+            
+            let histLocal = JSON.parse(localStorage.getItem('vnt_pnr_history')) || [];
+            if (!novoRegistro.id) novoRegistro.id = Date.now().toString();
+            histLocal.push(novoRegistro);
+            localStorage.setItem('vnt_pnr_history', JSON.stringify(histLocal));
+            
+        } else if (tipo === 'saida') {
+            if (window._supabase) {
+                // Atualiza o registro ativo (data_saida is null) para este pnr e nip
+                const { data } = await window._supabase.from('pnr_history')
+                    .select('*')
+                    .eq('pnr', pnr)
+                    .eq('nip', nip)
+                    .is('data_saida', null)
+                    .order('data_entrada', { ascending: false })
+                    .limit(1);
+                    
+                if (data && data.length > 0) {
+                    await window._supabase.from('pnr_history')
+                        .update({ data_saida: dataAtual })
+                        .eq('id', data[0].id);
+                }
+            }
+            
+            let histLocal = JSON.parse(localStorage.getItem('vnt_pnr_history')) || [];
+            // Acha o último ativo
+            for (let i = histLocal.length - 1; i >= 0; i--) {
+                if (histLocal[i].pnr === pnr && histLocal[i].nip === nip && !histLocal[i].data_saida) {
+                    histLocal[i].data_saida = dataAtual;
+                    break;
+                }
+            }
+            localStorage.setItem('vnt_pnr_history', JSON.stringify(histLocal));
+        }
+    } catch (err) {
+        console.error('Erro ao registrar histórico de ocupação:', err);
+    }
+};
+
 // ====== EDIÇÃO DE MORADORES PELO SÍNDICO ====== //
 window.abrirModalEditarMorador = async function(nip) {
     if (!nip) {
@@ -943,6 +1146,15 @@ window.salvarEdicaoMorador = async function(e) {
             dadosEdit.animais.especie = selAni;
         }
 
+        // Registrar no histórico de ocupação se houver mudança de endereço
+        const enderecoAntigo = JSON.parse(formStr).dadosPessoais.endereco || JSON.parse(formStr).dadosPessoais.enderecoPnr;
+        if (endereco && endereco !== enderecoAntigo) {
+            if (enderecoAntigo) {
+                await registrarHistoricoOcupacao(enderecoAntigo, nip, dadosEdit.dadosPessoais.nomeCompleto, 'saida');
+            }
+            await registrarHistoricoOcupacao(endereco, nip, dadosEdit.dadosPessoais.nomeCompleto, 'entrada');
+        }
+
         // Salvar via Supabase
         if (window._supabase) {
             const { error } = await window._supabase.from('moradores').update({ dados: dadosEdit }).eq('nip', nip);
@@ -1014,6 +1226,13 @@ window.apagarMorador = async function(nip) {
             alert("Erro: Conexão com Supabase não disponível.");
             return;
         }
+        
+        let { data } = await window._supabase.from('moradores').select('dados').eq('nip', nip);
+        if (data && data.length > 0) {
+            let pnr = data[0].dados.dadosPessoais.endereco || data[0].dados.dadosPessoais.enderecoPnr;
+            if (pnr) await registrarHistoricoOcupacao(pnr, nip, data[0].dados.dadosPessoais.nomeCompleto, 'saida');
+        }
+
         await window._supabase.from('moradores').delete().eq('nip', nip);
         setTimeout(() => alert("Morador e todas as suas permissões foram excluídos com sucesso do banco de dados."), 100);
         if (typeof renderMoradores === 'function') renderMoradores();
@@ -1067,6 +1286,20 @@ document.addEventListener('input', function (e) {
     }
 });
 
+function validarNIP(nip) {
+    if (!nip) return false;
+    const n = nip.replace(/\D/g, '');
+    if (n.length !== 8) return false;
+    let soma = 0;
+    for (let i = 0; i < 7; i++) {
+        soma += parseInt(n.charAt(i)) * (8 - i);
+    }
+    const r = soma % 11;
+    let dv = 11 - r;
+    if (dv === 10 || dv === 11) dv = 0;
+    return dv === parseInt(n.charAt(7));
+}
+
 function validarCPF(cpf) {
     cpf = cpf.replace(/\D/g, '');
     if (cpf === '') return false;
@@ -1117,6 +1350,7 @@ window.salvarMoradorSindico = async function (e) {
         } else {
             // insert
             await window._supabase.from('moradores').insert([{ nip: nip, dados: mockData }]);
+            await registrarHistoricoOcupacao(endereco, nip, nome, 'entrada');
             alert("Morador cadastrado com sucesso! Acesso liberado.");
             document.getElementById('formNovoMoradorSindico').reset();
             document.getElementById('modalNovoMorador').style.display = 'none';
@@ -1171,11 +1405,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Merge
                     let merged = { ...oldData, ...payload };
                     await window._supabase.from('moradores').update({ dados: merged }).eq('nip', currentNip);
+                    
+                    if (payload.enderecoPnr && oldData.enderecoPnr !== payload.enderecoPnr) {
+                        if (oldData.enderecoPnr) await registrarHistoricoOcupacao(oldData.enderecoPnr, currentNip, oldData.nomeCompleto, 'saida');
+                        await registrarHistoricoOcupacao(payload.enderecoPnr, currentNip, payload.nomeCompleto || oldData.nomeCompleto, 'entrada');
+                    }
+                    
                     alert("Seus dados foram atualizados com sucesso!");
                 } else {
                     // Force create if somehow missing
                     payload.senha = 'marinha123';
                     await window._supabase.from('moradores').insert([{ nip: currentNip, dados: payload }]);
+                    await registrarHistoricoOcupacao(payload.enderecoPnr, currentNip, payload.nomeCompleto, 'entrada');
                     alert("Seus dados foram salvos com sucesso!");
                 }
             } catch (ex) {

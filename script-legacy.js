@@ -139,152 +139,161 @@ document.addEventListener('DOMContentLoaded', /*#__PURE__*/_asyncToGenerator(/*#
           loginForm.addEventListener('submit', /*#__PURE__*/function () {
             var _ref2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(e) {
               var nip, senha, btn, validPwd, _yield$window$_supaba, data, error, _yield$window$_supaba2, _data, _error, moradorData, dados, senhaBanco, modal, _t;
-              return _regenerator().w(function (_context2) {
-                while (1) switch (_context2.p = _context2.n) {
-                  case 0:
-                    e.preventDefault();
-                    nip = document.getElementById('nip').value.toLowerCase();
-                    senha = document.getElementById('senha').value;
-                    btn = loginForm.querySelector("button[type='submit']");
-                    btn.innerHTML = "Verificando...";
-                    btn.disabled = true;
+              try {
+                return _regenerator().w(function (_context2) {
+                  while (1) switch (_context2.p = _context2.n) {
+                    case 0:
+                      e.preventDefault();
+                      nip = document.getElementById('nip').value.toLowerCase();
+                      senha = document.getElementById('senha').value;
+                      btn = loginForm.querySelector("button[type='submit']");
+                      btn.innerHTML = "Verificando...";
+                      btn.disabled = true;
 
-                    // Checagem Dinamica do Sindico
-                    if (!(nip === 'sindico' || nip.includes('admin'))) {
-                      _context2.n = 7;
-                      break;
-                    }
-                    validPwd = 'sindico';
-                    _context2.p = 1;
-                    if (!window._supabase) {
-                      _context2.n = 3;
-                      break;
-                    }
-                    _context2.n = 2;
-                    return window._supabase.from('moradores').select('dados').eq('nip', 'sindico');
-                  case 2:
-                    _yield$window$_supaba = _context2.v;
-                    data = _yield$window$_supaba.data;
-                    error = _yield$window$_supaba.error;
-                    if (data && data.length > 0 && data[0].dados && data[0].dados.senha) {
-                      validPwd = data[0].dados.senha.trim();
-                    }
-                  case 3:
-                    _context2.n = 5;
-                    break;
-                  case 4:
-                    _context2.p = 4;
-                    _t = _context2.v;
-                    console.error("Erro consultando supabase para sindico:", _t);
-                  case 5:
-                    if (!(senha.trim() !== validPwd)) {
-                      _context2.n = 6;
-                      break;
-                    }
-                    alert("Senha do Síndico Incorreta!");
-                    btn.innerHTML = 'Acessar <i class="ri-arrow-right-line"></i>';
-                    btn.disabled = false;
-                    return _context2.a(2);
-                  case 6:
-                    localStorage.setItem('vnt_role', 'sindico');
-                    localStorage.setItem('vnt_user', 'Síndico');
-                    window.location.href = 'dashboard.html';
-                    return _context2.a(2);
-                  case 7:
-                    if (validarNIP(nip)) {
-                      _context2.n = 8;
-                      break;
-                    }
-                    alert("NIP Inválido (Regra Módulo 11)! Verifique o Dígito Verificador inserido.");
-                    btn.innerHTML = 'Acessar <i class="ri-arrow-right-line"></i>';
-                    btn.disabled = false;
-                    return _context2.a(2);
-                  case 8:
-                    if (!window._supabase) {
-                      _context2.n = 13;
-                      break;
-                    }
-                    _context2.n = 9;
-                    return window._supabase.from('moradores').select('*').eq('nip', nip);
-                  case 9:
-                    _yield$window$_supaba2 = _context2.v;
-                    _data = _yield$window$_supaba2.data;
-                    _error = _yield$window$_supaba2.error;
-                    if (!(_data && _data.length > 0)) {
-                      _context2.n = 11;
-                      break;
-                    }
-                    moradorData = _data[0];
-                    dados = moradorData.dados || {};
-                    senhaBanco = dados.senha || 'marinha123';
-                    if (!(senha !== senhaBanco)) {
-                      _context2.n = 10;
-                      break;
-                    }
-                    alert("Senha Incorreta!");
-                    btn.innerHTML = 'Acessar <i class="ri-arrow-right-line"></i>';
-                    btn.disabled = false;
-                    return _context2.a(2);
-                  case 10:
-                    if (senhaBanco === 'marinha123') {
-                      // FORÇA MUDANÇA DE SENHA
-                      modal = document.getElementById('modalMudarSenha');
-                      if (modal) {
-                        modal.style.display = 'flex';
-                        document.getElementById('btnSalvarSenha').onclick = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
-                          var novaSenha, btnSalvar;
-                          return _regenerator().w(function (_context) {
-                            while (1) switch (_context.n) {
-                              case 0:
-                                novaSenha = document.getElementById('novaSenha').value;
-                                if (!(novaSenha.length < 6)) {
-                                  _context.n = 1;
-                                  break;
-                                }
-                                alert("A senha deve ter no mínimo 6 caracteres para ser segura.");
-                                return _context.a(2);
-                              case 1:
-                                btnSalvar = document.getElementById('btnSalvarSenha');
-                                btnSalvar.innerHTML = "Salvando...";
-                                btnSalvar.disabled = true;
-                                dados.senha = novaSenha;
-                                _context.n = 2;
-                                return window._supabase.from('moradores').update({
-                                  dados: dados
-                                }).eq('nip', nip);
-                              case 2:
-                                localStorage.setItem('vnt_role', nip);
-                                localStorage.setItem('vnt_user', nip);
-                                window.location.href = 'dashboard.html';
-                              case 3:
-                                return _context.a(2);
-                            }
-                          }, _callee);
-                        }));
+                      // Checagem Dinamica do Sindico
+                      if (!(nip === 'sindico' || nip.includes('admin'))) {
+                        _context2.n = 7;
+                        break;
                       }
-                    } else {
-                      // Login normal se a senha não for a de fábrica
-                      localStorage.setItem('vnt_role', nip);
-                      localStorage.setItem('vnt_user', nip);
+                      validPwd = 'sindico';
+                      _context2.p = 1;
+                      if (!window._supabase) {
+                        _context2.n = 3;
+                        break;
+                      }
+                      _context2.n = 2;
+                      return window._supabase.from('moradores').select('dados').eq('nip', 'sindico');
+                    case 2:
+                      _yield$window$_supaba = _context2.v;
+                      data = _yield$window$_supaba.data;
+                      error = _yield$window$_supaba.error;
+                      if (data && data.length > 0 && data[0].dados && data[0].dados.senha) {
+                        validPwd = data[0].dados.senha.trim();
+                      }
+                    case 3:
+                      _context2.n = 5;
+                      break;
+                    case 4:
+                      _context2.p = 4;
+                      _t = _context2.v;
+                      console.error("Erro consultando supabase para sindico:", _t);
+                    case 5:
+                      if (!(senha.trim() !== validPwd)) {
+                        _context2.n = 6;
+                        break;
+                      }
+                      alert("Senha do Síndico Incorreta!");
+                      btn.innerHTML = 'Acessar <i class="ri-arrow-right-line"></i>';
+                      btn.disabled = false;
+                      return _context2.a(2);
+                    case 6:
+                      localStorage.setItem('vnt_role', 'sindico');
+                      localStorage.setItem('vnt_user', 'Síndico');
                       window.location.href = 'dashboard.html';
-                    }
-                    _context2.n = 12;
-                    break;
-                  case 11:
-                    alert("Acesso Negado! NIP não matriculado na Vila Naval. Solicite liberação na administração.");
-                    btn.innerHTML = 'Acessar <i class="ri-arrow-right-line"></i>';
-                    btn.disabled = false;
-                  case 12:
-                    _context2.n = 14;
-                    break;
-                  case 13:
-                    alert("Erro grave: Banco de Dados Inacessível.");
-                    btn.innerHTML = 'Acessar <i class="ri-arrow-right-line"></i>';
-                    btn.disabled = false;
-                  case 14:
-                    return _context2.a(2);
+                      return _context2.a(2);
+                    case 7:
+                      if (validarNIP(nip)) {
+                        _context2.n = 8;
+                        break;
+                      }
+                      alert("NIP Inválido (Regra Módulo 11)! Verifique o Dígito Verificador inserido.");
+                      btn.innerHTML = 'Acessar <i class="ri-arrow-right-line"></i>';
+                      btn.disabled = false;
+                      return _context2.a(2);
+                    case 8:
+                      if (!window._supabase) {
+                        _context2.n = 13;
+                        break;
+                      }
+                      _context2.n = 9;
+                      return window._supabase.from('moradores').select('*').eq('nip', nip);
+                    case 9:
+                      _yield$window$_supaba2 = _context2.v;
+                      _data = _yield$window$_supaba2.data;
+                      _error = _yield$window$_supaba2.error;
+                      if (!(_data && _data.length > 0)) {
+                        _context2.n = 11;
+                        break;
+                      }
+                      moradorData = _data[0];
+                      dados = moradorData.dados || {};
+                      senhaBanco = dados.senha || 'marinha123';
+                      if (!(senha !== senhaBanco)) {
+                        _context2.n = 10;
+                        break;
+                      }
+                      alert("Senha Incorreta!");
+                      btn.innerHTML = 'Acessar <i class="ri-arrow-right-line"></i>';
+                      btn.disabled = false;
+                      return _context2.a(2);
+                    case 10:
+                      if (senhaBanco === 'marinha123') {
+                        // FORÇA MUDANÇA DE SENHA
+                        modal = document.getElementById('modalMudarSenha');
+                        if (modal) {
+                          modal.style.display = 'flex';
+                          document.getElementById('btnSalvarSenha').onclick = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
+                            var novaSenha, btnSalvar;
+                            return _regenerator().w(function (_context) {
+                              while (1) switch (_context.n) {
+                                case 0:
+                                  novaSenha = document.getElementById('novaSenha').value;
+                                  if (!(novaSenha.length < 6)) {
+                                    _context.n = 1;
+                                    break;
+                                  }
+                                  alert("A senha deve ter no mínimo 6 caracteres para ser segura.");
+                                  return _context.a(2);
+                                case 1:
+                                  btnSalvar = document.getElementById('btnSalvarSenha');
+                                  btnSalvar.innerHTML = "Salvando...";
+                                  btnSalvar.disabled = true;
+                                  dados.senha = novaSenha;
+                                  _context.n = 2;
+                                  return window._supabase.from('moradores').update({
+                                    dados: dados
+                                  }).eq('nip', nip);
+                                case 2:
+                                  localStorage.setItem('vnt_role', nip);
+                                  localStorage.setItem('vnt_user', nip);
+                                  window.location.href = 'dashboard.html';
+                                case 3:
+                                  return _context.a(2);
+                              }
+                            }, _callee);
+                          }));
+                        }
+                      } else {
+                        // Login normal se a senha não for a de fábrica
+                        localStorage.setItem('vnt_role', nip);
+                        localStorage.setItem('vnt_user', nip);
+                        window.location.href = 'dashboard.html';
+                      }
+                      _context2.n = 12;
+                      break;
+                    case 11:
+                      alert("Acesso Negado! NIP não matriculado na Vila Naval. Solicite liberação na administração.");
+                      btn.innerHTML = 'Acessar <i class="ri-arrow-right-line"></i>';
+                      btn.disabled = false;
+                    case 12:
+                      _context2.n = 14;
+                      break;
+                    case 13:
+                      alert("Erro grave: Banco de Dados Inacessível.");
+                      btn.innerHTML = 'Acessar <i class="ri-arrow-right-line"></i>';
+                      btn.disabled = false;
+                    case 14:
+                      return _context2.a(2);
+                  }
+                }, _callee2, null, [[1, 4]]);
+              } catch (err) {
+                console.error("Login Error:", err);
+                alert("Ocorreu um erro ao processar seu login. Tente novamente.");
+                if (btn) {
+                  btn.innerHTML = 'Acessar <i class="ri-arrow-right-line"></i>';
+                  btn.disabled = false;
                 }
-              }, _callee2, null, [[1, 4]]);
+              }
             }));
             return function (_x4) {
               return _ref2.apply(this, arguments);
@@ -784,10 +793,10 @@ function _renderMoradores() {
               var _data2 = mapMoradores[pnr];
               var dependentes = _data2.dependentes.nomeDependente1 !== 'Não informado' ? 'Cadastrado' : 'S/ Dep';
               var pets = _data2.animais.possuiAnimal === 'Sim' ? _data2.animais.especie : 'S/ Pet';
-              html += "\n            <div class=\"pnr-card ocupado\" style=\"position:relative;\">\n                <div class=\"pnr-title\"><i class=\"ri-home-4-fill\"></i> ".concat(pnr, "</div>\n                <p class=\"pnr-details\">Perm: ").concat(_data2.dadosPessoais.posto, " ").concat(_data2.dadosPessoais.nomeCompleto.split(' ')[0], "</p>\n                <p class=\"pnr-details\"><i class=\"ri-group-line\"></i> ").concat(dependentes, " | <i class=\"ri-github-fill\"></i> ").concat(pets, "</p>\n                <button class=\"btn btn-sm btn-outline mt-2\" onclick=\"alert('Funcionalidade Editar Morador: NIP ' + '").concat(_data2.dadosPessoais.nip, "')\" style=\"width:100%; border: 1px solid #1a73e8; color: #1a73e8; background: transparent; cursor: pointer; padding: 5px; border-radius: 5px;\"><i class=\"ri-pencil-line\"></i> Editar</button>\n            </div>\n            ");
+              html += "\n            <div class=\"pnr-card ocupado\" style=\"position:relative;\">\n                <div class=\"pnr-title\"><i class=\"ri-home-4-fill\"></i> ".concat(pnr, "</div>\n                <p class=\"pnr-details\">Perm: ").concat(_data2.dadosPessoais.posto, " ").concat(_data2.dadosPessoais.nomeCompleto.split(' ')[0], "</p>\n                <p class=\"pnr-details\"><i class=\"ri-group-line\"></i> ").concat(dependentes, " | <i class=\"ri-github-fill\"></i> ").concat(pets, "</p>\n                <div style=\"display:flex; gap: 5px; margin-top: 5px;\">\n                    <button class=\"btn btn-sm btn-outline mt-2\" onclick=\"abrirModalHistorico('").concat(pnr, "')\" style=\"width:100%; border: 1px solid #805ad5; color: #805ad5; background: transparent; cursor: pointer; padding: 5px; border-radius: 5px;\"><i class=\"ri-history-line\"></i> Hist\xF3rico</button>\n                    <button class=\"btn btn-sm btn-outline mt-2\" onclick=\"abrirModalEditarMorador('").concat(_data2.dadosPessoais.nip, "')\" style=\"width:100%; border: 1px solid #1a73e8; color: #1a73e8; background: transparent; cursor: pointer; padding: 5px; border-radius: 5px;\"><i class=\"ri-pencil-line\"></i> Editar</button>\n                </div>\n            </div>\n            ");
             } else {
               vagoCount++;
-              html += "\n            <div class=\"pnr-card vago\">\n                <div class=\"pnr-title\"><i class=\"ri-home-x-line\"></i> ".concat(pnr, "</div>\n                <p class=\"pnr-details text-danger\"><strong>VAGO</strong></p>\n                <p class=\"pnr-details\">Aguardando novo morador</p>\n            </div>\n            ");
+              html += "\n            <div class=\"pnr-card vago\">\n                <div class=\"pnr-title\"><i class=\"ri-home-x-line\"></i> ".concat(pnr, "</div>\n                <p class=\"pnr-details text-danger\"><strong>VAGO</strong></p>\n                <p class=\"pnr-details\">Aguardando novo morador</p>\n                <button class=\"btn btn-sm btn-outline mt-2\" onclick=\"abrirModalHistorico('").concat(pnr, "')\" style=\"width:100%; border: 1px solid #805ad5; color: #805ad5; background: transparent; cursor: pointer; padding: 5px; border-radius: 5px;\"><i class=\"ri-history-line\"></i> Hist\xF3rico</button>\n            </div>\n            ");
             }
           });
           pnrGrid.innerHTML = html;
@@ -1068,6 +1077,19 @@ document.addEventListener('input', function (e) {
     e.target.value = val;
   }
 });
+function validarNIP(nip) {
+  if (!nip) return false;
+  var n = nip.replace(/\D/g, '');
+  if (n.length !== 8) return false;
+  var soma = 0;
+  for (var i = 0; i < 7; i++) {
+    soma += parseInt(n.charAt(i)) * (8 - i);
+  }
+  var r = soma % 11;
+  var dv = 11 - r;
+  if (dv === 10 || dv === 11) dv = 0;
+  return dv === parseInt(n.charAt(7));
+}
 function validarCPF(cpf) {
   cpf = cpf.replace(/\D/g, '');
   if (cpf === '') return false;
@@ -1409,3 +1431,209 @@ document.addEventListener('DOMContentLoaded', () => {
     // Aguarda leve delay para garantir Supabase JS load
     setTimeout(window.carregarEstatisticasDashboard, 500);
 });
+
+// ====== EDIÇÃO DE MORADORES PELO SÍNDICO ====== //
+window.abrirModalEditarMorador = async function(nip) {
+    if (!nip) { alert("Erro: NIP não informado."); return; }
+    let moradores = [];
+    if (window._supabase) {
+        let { data } = await window._supabase.from('moradores').select('dados').eq('nip', nip);
+        if (data && data.length > 0) moradores = data.map(d => d.dados);
+    }
+    if (moradores.length === 0) {
+        moradores = JSON.parse(localStorage.getItem('vnt_moradores')) || [];
+        moradores = moradores.filter(m => m.dadosPessoais && m.dadosPessoais.nip === nip);
+    }
+    if (moradores.length === 0) { alert("Morador não encontrado!"); return; }
+    const dados = moradores[0];
+    document.getElementById('formEditarMoradorSindico').dataset.dadosOriginais = JSON.stringify(dados);
+    document.getElementById('editMoradorNip').value = dados.dadosPessoais.nip;
+    document.getElementById('editMoradorPosto').value = dados.dadosPessoais.posto || '';
+    document.getElementById('editMoradorNome').value = dados.dadosPessoais.nomeCompleto || '';
+    document.getElementById('editMoradorEndereco').value = dados.dadosPessoais.endereco || dados.dadosPessoais.enderecoPnr || '';
+    const possuiDep = dados.dependentes && dados.dependentes.nomeDependente1 !== 'Não informado' ? 'Sim' : 'Não';
+    document.getElementById('editMoradorDependentes').value = possuiDep;
+    let possuiAnimal = "Nenhum";
+    if (dados.animais && dados.animais.possuiAnimal === 'Sim') {
+        possuiAnimal = dados.animais.especie;
+        if (!['Cão', 'Gato'].includes(possuiAnimal)) possuiAnimal = 'Outro';
+    }
+    document.getElementById('editMoradorAnimais').value = possuiAnimal;
+    document.getElementById('modalEditarMorador').style.display = 'flex';
+};
+
+window.salvarEdicaoMorador = async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnSalvarEdicaoMorador');
+    btn.innerHTML = '⏳ Salvando...'; btn.disabled = true;
+    try {
+        const nip = document.getElementById('editMoradorNip').value;
+        const formStr = document.getElementById('formEditarMoradorSindico').dataset.dadosOriginais;
+        if (!nip || !formStr) throw new Error("Dados incompletos");
+        let dadosEdit = JSON.parse(formStr);
+        dadosEdit.dadosPessoais.posto = document.getElementById('editMoradorPosto').value;
+        dadosEdit.dadosPessoais.nomeCompleto = document.getElementById('editMoradorNome').value;
+        const endereco = document.getElementById('editMoradorEndereco').value;
+        const enderecoAntigo = JSON.parse(formStr).dadosPessoais.endereco || JSON.parse(formStr).dadosPessoais.enderecoPnr;
+        dadosEdit.dadosPessoais.endereco = endereco;
+        dadosEdit.dadosPessoais.enderecoPnr = endereco;
+        const selDep = document.getElementById('editMoradorDependentes').value;
+        if (!dadosEdit.dependentes) dadosEdit.dependentes = {};
+        if (selDep === 'Não') dadosEdit.dependentes.nomeDependente1 = 'Não informado';
+        else if (selDep === 'Sim' && dadosEdit.dependentes.nomeDependente1 === 'Não informado') dadosEdit.dependentes.nomeDependente1 = 'Dependente Cadastrado';
+        const selAni = document.getElementById('editMoradorAnimais').value;
+        if (!dadosEdit.animais) dadosEdit.animais = {};
+        if (selAni === 'Nenhum') { dadosEdit.animais.possuiAnimal = 'Não'; dadosEdit.animais.especie = ''; }
+        else { dadosEdit.animais.possuiAnimal = 'Sim'; dadosEdit.animais.especie = selAni; }
+        // Histórico de mudança de PNR
+        if (endereco && endereco !== enderecoAntigo) {
+            if (enderecoAntigo) await window.registrarHistoricoOcupacao(enderecoAntigo, nip, dadosEdit.dadosPessoais.nomeCompleto, 'saida');
+            await window.registrarHistoricoOcupacao(endereco, nip, dadosEdit.dadosPessoais.nomeCompleto, 'entrada');
+        }
+        if (window._supabase) {
+            const { error } = await window._supabase.from('moradores').update({ dados: dadosEdit }).eq('nip', nip);
+            if (error) throw error;
+        }
+        let lblMoradores = JSON.parse(localStorage.getItem('vnt_moradores')) || [];
+        const idx = lblMoradores.findIndex(m => m.dadosPessoais && m.dadosPessoais.nip === nip);
+        if (idx > -1) lblMoradores[idx] = dadosEdit; else lblMoradores.push(dadosEdit);
+        localStorage.setItem('vnt_moradores', JSON.stringify(lblMoradores));
+        document.getElementById('modalEditarMorador').style.display = 'none';
+        setTimeout(() => alert('Dados atualizados com sucesso!'), 100);
+        if (typeof renderMoradores === 'function') await renderMoradores();
+    } catch (err) {
+        alert("Ocorreu um erro ao salvar. Verifique o console.");
+        console.error(err);
+    } finally {
+        btn.innerHTML = 'Salvar Alterações'; btn.disabled = false;
+    }
+};
+
+// ====== HISTÓRICO DE PNR E OCORRÊNCIAS ====== //
+window.registrarHistoricoOcupacao = async function(pnr, nip, nome, tipo) {
+    try {
+        const dataAtual = new Date().toISOString().split('T')[0];
+        if (tipo === 'entrada') {
+            const reg = { pnr, nip, nome, data_entrada: dataAtual, data_saida: null };
+            if (window._supabase) await window._supabase.from('pnr_history').insert([reg]);
+            let h = JSON.parse(localStorage.getItem('vnt_pnr_history')) || [];
+            h.push({ ...reg, id: Date.now().toString() });
+            localStorage.setItem('vnt_pnr_history', JSON.stringify(h));
+        } else if (tipo === 'saida') {
+            if (window._supabase) {
+                const { data } = await window._supabase.from('pnr_history').select('*').eq('pnr', pnr).eq('nip', nip).is('data_saida', null).order('data_entrada', { ascending: false }).limit(1);
+                if (data && data.length > 0) await window._supabase.from('pnr_history').update({ data_saida: dataAtual }).eq('id', data[0].id);
+            }
+            let h = JSON.parse(localStorage.getItem('vnt_pnr_history')) || [];
+            for (let i = h.length - 1; i >= 0; i--) {
+                if (h[i].pnr === pnr && h[i].nip === nip && !h[i].data_saida) { h[i].data_saida = dataAtual; break; }
+            }
+            localStorage.setItem('vnt_pnr_history', JSON.stringify(h));
+        }
+    } catch (err) { console.error('Erro ao registrar histórico:', err); }
+};
+
+window.showHistTab = function(tab) {
+    document.getElementById('tabOcupacao').style.display = tab === 'ocupacao' ? 'block' : 'none';
+    document.getElementById('tabOcorrencias').style.display = tab === 'ocorrencias' ? 'block' : 'none';
+    document.getElementById('btnTabOcupacao').className = tab === 'ocupacao' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-outline';
+    document.getElementById('btnTabOcorrencias').className = tab === 'ocorrencias' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-outline';
+};
+
+window.carregarHistoricoPnr = async function(pnr) {
+    const listOcup = document.getElementById('listHistOcupacao');
+    const listOcorr = document.getElementById('listHistOcorrencias');
+    listOcup.innerHTML = '<p>Carregando...</p>';
+    listOcorr.innerHTML = '<p>Carregando...</p>';
+    let histO = [], histI = [];
+    if (window._supabase) {
+        const { data: d1 } = await window._supabase.from('pnr_history').select('*').eq('pnr', pnr).order('data_entrada', { ascending: false });
+        if (d1) histO = d1;
+        const { data: d2 } = await window._supabase.from('interaction_history').select('*').eq('pnr', pnr).order('data_ocorrencia', { ascending: false });
+        if (d2) histI = d2;
+    } else {
+        histO = (JSON.parse(localStorage.getItem('vnt_pnr_history')) || []).filter(h => h.pnr === pnr);
+        histI = (JSON.parse(localStorage.getItem('vnt_interaction_history')) || []).filter(h => h.pnr === pnr);
+    }
+    listOcup.innerHTML = histO.length === 0 ? '<p class="text-muted">Nenhum registro de ocupação anterior.</p>' :
+        histO.map(h => `<div style="border-left:3px solid var(--primary-color);padding-left:10px;margin-bottom:15px;"><p style="margin:0;font-weight:600;">${h.nome} (NIP: ${h.nip})</p><p style="margin:0;font-size:0.85rem;color:var(--text-muted);">Entrada: ${h.data_entrada ? new Date(h.data_entrada).toLocaleDateString('pt-BR',{timeZone:'UTC'}) : '-'} | Saída: ${h.data_saida ? new Date(h.data_saida).toLocaleDateString('pt-BR',{timeZone:'UTC'}) : 'Atual'}</p></div>`).join('');
+    listOcorr.innerHTML = histI.length === 0 ? '<p class="text-muted">Nenhuma ocorrência registrada.</p>' :
+        histI.map(h => `<div style="background:#fff;padding:10px;border-radius:8px;border:1px solid #e2e8f0;margin-bottom:10px;"><div style="display:flex;justify-content:space-between;margin-bottom:5px;"><strong>${h.motivo}</strong><span style="font-size:0.8rem;color:var(--text-muted);">${h.data_ocorrencia ? new Date(h.data_ocorrencia).toLocaleDateString('pt-BR',{timeZone:'UTC'}) : '-'}</span></div><p style="margin:0 0 5px 0;font-size:0.9rem;"><strong>Providência:</strong> ${h.providencia}</p>${h.observacao ? `<p style="margin:0;font-size:0.85rem;font-style:italic;color:#666;">"${h.observacao}"</p>` : ''}</div>`).join('');
+};
+
+window.abrirModalHistorico = async function(pnr) {
+    document.getElementById('histPnrTitle').textContent = pnr;
+    document.getElementById('histOcorrenciaPnr').value = pnr;
+    let moradores = JSON.parse(localStorage.getItem('vnt_moradores')) || [];
+    if (window._supabase) {
+        let { data } = await window._supabase.from('moradores').select('dados');
+        if (data && data.length > 0) moradores = data.map(d => d.dados);
+    }
+    const moradorAtual = moradores.find(m => m.dadosPessoais && (m.dadosPessoais.endereco === pnr || m.dadosPessoais.enderecoPnr === pnr));
+    document.getElementById('histOcorrenciaNip').value = moradorAtual ? moradorAtual.dadosPessoais.nip : '';
+    document.getElementById('formNovaOcorrencia').reset();
+    document.getElementById('novaOcData').valueAsDate = new Date();
+    window.showHistTab('ocupacao');
+    document.getElementById('modalHistorico').style.display = 'flex';
+    await window.carregarHistoricoPnr(pnr);
+};
+
+window.salvarOcorrencia = async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnSalvarOcorrencia');
+    btn.innerHTML = 'Salvando...'; btn.disabled = true;
+    try {
+        const pnr = document.getElementById('histOcorrenciaPnr').value;
+        const nip = document.getElementById('histOcorrenciaNip').value;
+        const oc = {
+            pnr, nip,
+            data_ocorrencia: document.getElementById('novaOcData').value,
+            motivo: document.getElementById('novaOcMotivo').value,
+            providencia: document.getElementById('novaOcProvidencia').value,
+            observacao: document.getElementById('novaOcObs').value
+        };
+        if (window._supabase) await window._supabase.from('interaction_history').insert([oc]);
+        let h = JSON.parse(localStorage.getItem('vnt_interaction_history')) || [];
+        h.push({ ...oc, id: Date.now().toString() });
+        localStorage.setItem('vnt_interaction_history', JSON.stringify(h));
+        document.getElementById('formNovaOcorrencia').reset();
+        await window.carregarHistoricoPnr(pnr);
+        alert('Ocorrência salva com sucesso!');
+    } catch (err) {
+        console.error(err); alert('Erro ao salvar ocorrência.');
+    } finally {
+        btn.innerHTML = 'Salvar Registro'; btn.disabled = false;
+    }
+};
+
+window.autenticarMorador = async function(nip) {
+    if (!confirm(`Confirmar verificação do NIP ${nip}?`)) return;
+    try {
+        if (!window._supabase) { alert("BD offline"); return; }
+        let { data } = await window._supabase.from('moradores').select('dados').eq('nip', nip);
+        if (data && data.length > 0) {
+            let dados = data[0].dados;
+            dados.statusVerificacao = 'Verificado';
+            await window._supabase.from('moradores').update({ dados }).eq('nip', nip);
+            setTimeout(() => alert("Cadastro verificado!"), 100);
+            if (typeof renderMoradores === 'function') renderMoradores();
+        }
+    } catch(e) { alert("Erro: " + e.message); }
+};
+
+window.apagarMorador = async function(nip) {
+    let confirmNum = Math.floor(1000 + Math.random() * 9000);
+    let pass = prompt(`EXCLUSÃO de NIP: ${nip}\n\nDigite o número para confirmar: ${confirmNum}`);
+    if (pass !== confirmNum.toString()) { alert("Cancelado: número incorreto."); return; }
+    try {
+        if (!window._supabase) { alert("BD offline"); return; }
+        let { data } = await window._supabase.from('moradores').select('dados').eq('nip', nip);
+        if (data && data.length > 0) {
+            let pnr = data[0].dados.dadosPessoais.endereco || data[0].dados.dadosPessoais.enderecoPnr;
+            if (pnr) await window.registrarHistoricoOcupacao(pnr, nip, data[0].dados.dadosPessoais.nomeCompleto, 'saida');
+        }
+        await window._supabase.from('moradores').delete().eq('nip', nip);
+        setTimeout(() => alert("Excluído com sucesso!"), 100);
+        if (typeof renderMoradores === 'function') renderMoradores();
+    } catch(e) { alert("Erro: " + e.message); }
+};
