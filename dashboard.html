@@ -794,10 +794,18 @@
 
     <!-- Seção 4: Termo de Compromisso -->
     <section class="form-group">
-        <h2>Termo de Compromisso</h2>
+        <h2>Termos e Compromissos</h2>
+
+        <div class="alert-info" style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin-bottom: 20px; border-radius: 4px; overflow: hidden;">
+            <h4 style="color: #856404; margin-top: 0; margin-bottom: 8px;"><i class="ri-error-warning-line"></i> Atenção - Responsabilidade Legal</h4>
+            <p style="color: #856404; margin-bottom: 0; font-size: 0.9rem; line-height: 1.5;">Ao submeter este formulário, você assume inteira responsabilidade pelos dados declarados. A inserção de dados falsos ou a omissão de informações constitui crime de <strong>Falsidade Ideológica (Art. 299 do Código Penal)</strong>, sujeito a penalidades sob o regulamento da Vila Naval e a lei vigente.</p>
+        </div>
 
         <div class="field">
-            <label>Declaro estar ciente: *</label>
+            <label style="display: flex; align-items: center; gap: 8px;">
+                Declaro estar ciente e aceito: *
+                <a href="#" onclick="document.getElementById('modalTermos').style.display='flex'; return false;" style="font-size: 0.85rem; color: #0A2342; text-decoration: underline; font-weight: normal;">(Clique aqui para ler)</a>
+            </label>
             <div class="checkbox-group">
                 <label class="checkbox-label">
                     <input type="checkbox" name="termo1" value="Normas do PNR" required>
@@ -817,7 +825,7 @@
                 </label>
                 <label class="checkbox-label">
                     <input type="checkbox" name="termo5" value="Veracidade das informações" required>
-                    <span>Da veracidade das informações prestadas</span>
+                    <span><strong>Autodeclaração:</strong> Sob as penas da lei, declaro que as informações aqui prestadas são autênticas e verdadeiras.</span>
                 </label>
                 <label class="checkbox-label">
                     <input type="checkbox" name="termo6" value="Penalidades" required>
@@ -847,7 +855,10 @@
 
         <div id="summaryContent" class="summary-content"></div>
 
-        <button onclick="resetForm()" class="reset-btn">Enviar Novo Cadastro</button>
+        <div style="display: flex; gap: 10px; flex-direction: column; width: 100%; margin-top: 20px;">
+            <button type="button" onclick="window.baixarFichaPDF()" id="btnBaixarPdf" style="background: #2b6cb0; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 6px rgba(43, 108, 176, 0.2); transition: all 0.2s;"><i class="ri-file-download-line" style="font-size: 1.2rem;"></i> Baixar Comprovante (PDF)</button>
+            <button type="button" onclick="resetForm()" class="reset-btn" style="background: #f0f4f8; color: #4a5568;">Enviar Novo Cadastro</button>
+        </div>
     </div>
     </div>
     </section>
@@ -862,6 +873,34 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Script convertido para ES5 -->
     <script src="script-legacy.js"></script>
+
+    <!-- Modal de Termos -->
+    <div id="modalTermos" class="modal-overlay" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+        <div class="modal-content" style="background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 600px; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f0f4f8; padding-bottom: 15px; margin-bottom: 15px;">
+                <h3 style="color: #0A2342; margin: 0; font-size: 1.25rem;"><i class="ri-article-line"></i> Termos e Compromissos da APVNT</h3>
+                <button onclick="document.getElementById('modalTermos').style.display='none'" style="background: transparent; border: none; font-size: 1.5rem; color: #4a5568; cursor: pointer; padding: 0;"><i class="ri-close-line"></i></button>
+            </div>
+            
+            <div style="overflow-y: auto; padding-right: 10px; font-size: 0.95rem; color: #2d3748; line-height: 1.6; text-align: justify;">
+                <h4 style="color: #2b6cb0; margin-bottom: 10px; font-size: 1.05rem;"><i class="ri-information-line"></i> 1. Aceite das Normas do PNR</h4>
+                <p>A ocupação de um Próprio Nacional Residencial (PNR) exige que o permissionário assine formalmente o Termo de Compromisso de Comportamento nos PNR, declarando estar plenamente ciente das normas de convivência, dos seus direitos e dos seus deveres previstos na legislação em vigor. É dever irrenunciável do ocupante cumprir e fazer cumprir as prescrições legais e regulamentares referentes à permissão de uso do imóvel, bem como aderir formalmente à Convenção de Condomínio ou ao Estatuto da Associação de Permissionários aplicável. As normas internas e os estatutos estabelecem que todo associado deve ter o perfeito entendimento das regras; portanto, a alegação de desconhecimento das normas contidas nos documentos não isenta o morador das sanções e penalidades previstas em caso de infração.</p>
+                
+                <h4 style="color: #2b6cb0; margin-top: 20px; margin-bottom: 10px; font-size: 1.05rem;"><i class="ri-group-line"></i> 2. Responsabilidade por Dependentes</h4>
+                <p>O PNR destina-se, prioritariamente, à moradia temporária do militar da ativa na companhia de seus dependentes. O titular da permissão de uso do imóvel fica inteira e solidariamente responsável pelas atitudes, pelo comportamento e pelos eventuais danos causados por seus dependentes, convidados ou funcionários em qualquer área da Vila Naval. O permissionário responde não apenas pelas avarias físicas ao patrimônio, mas também pelo não cumprimento das normas de silêncio, de segurança e de ordem por parte daqueles que estiverem sob sua responsabilidade, arcando com o dever de reparar e indenizar prontamente todo e qualquer prejuízo material ou moral que der causa.</p>
+                
+                <h4 style="color: #2b6cb0; margin-top: 20px; margin-bottom: 10px; font-size: 1.05rem;"><i class="ri-guide-dog-line"></i> 3. Animais de Estimação</h4>
+                <p>A presença de animais de estimação no PNR e nas áreas comuns é permitida mediante estrita observância das normas estabelecidas de convivência e higiene, e deve restringir-se às espécies e quantidades autorizadas pela legislação. O tutor assume toda a responsabilidade civil e administrativa pela manutenção vacinal atualizada, atestado de sanidade, recolhimento imediato de quaisquer dejetos produzidos nas dependências comuns e garantia de que o animal não cause incômodo sonoro ou risco à segurança da vizinhança. Em caso de ruído excessivo, postura agressiva ou descumprimento dos regramentos sanitários, o titular poderá ser compelido à remoção imediata do animal do interior do imóvel, além da aplicação das cominações previstas na regulamentação de patrimônio imobiliário.</p>
+
+                <h4 style="color: #2b6cb0; margin-top: 20px; margin-bottom: 10px; font-size: 1.05rem;"><i class="ri-scales-line"></i> 4. Veracidade das Informações e Autodeclaração</h4>
+                <p>A submissão destes dados tem caráter oficial perante a administração militar. A inserção, alteração ou omissão de dados que interfiram na prioridade de destinação do PNR, na atualização cadastral ou na contabilidade de encargos configura potencial irregularidade administrativa e disciplinar. O permissionário é responsável subsidiário por manter o cadastro sempre atualizado. Caso se constate que o permissionário prestou declaração falsa ou apresentou documento ideologicamente inidôneo (Art. 299 CPM / CP Penal e legislação esparsa da MB), a concessão do PNR poderá sofrer rescisão administrativa unilateral, associada à aplicação das devidas sanções na esfera administrativa, civil e, se configurado ilícito penal militar, sanções penais correspondentes.</p>
+            </div>
+            
+            <div style="margin-top: 20px; text-align: right; border-top: 2px solid #f0f4f8; padding-top: 15px;">
+                <button type="button" onclick="document.getElementById('modalTermos').style.display='none'" style="background: #2b6cb0; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer;">Compreendido</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Modal Alterar Senha Dashboard -->
     <div id="modalSenhaDashboard" class="modal-overlay"
@@ -1052,6 +1091,8 @@
         </div>
     </div>
 
+    <!-- Script de submissão do formulário interno de moradores -->
+    <script src="cadastro-interno.js"></script>
 </body>
 
 </html>
