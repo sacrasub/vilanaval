@@ -1461,18 +1461,33 @@ window.abrirModalEditarMorador = async function(nip) {
     if (moradores.length === 0) { alert("Morador não encontrado!"); return; }
     const dados = moradores[0];
     document.getElementById('formEditarMoradorSindico').dataset.dadosOriginais = JSON.stringify(dados);
-    document.getElementById('editMoradorNip').value = dados.dadosPessoais.nip;
-    document.getElementById('editMoradorPosto').value = dados.dadosPessoais.posto || '';
-    document.getElementById('editMoradorNome').value = dados.dadosPessoais.nomeCompleto || '';
-    document.getElementById('editMoradorEndereco').value = dados.dadosPessoais.endereco || dados.dadosPessoais.enderecoPnr || '';
-    const possuiDep = dados.dependentes && dados.dependentes.nomeDependente1 !== 'Não informado' ? 'Sim' : 'Não';
-    document.getElementById('editMoradorDependentes').value = possuiDep;
-    let possuiAnimal = "Nenhum";
-    if (dados.animais && dados.animais.possuiAnimal === 'Sim') {
-        possuiAnimal = dados.animais.especie;
-        if (!['Cão', 'Gato'].includes(possuiAnimal)) possuiAnimal = 'Outro';
-    }
-    document.getElementById('editMoradorAnimais').value = possuiAnimal;
+    
+    // 1. DADOS PESSOAIS
+    const p = dados.dadosPessoais || {};
+    document.getElementById('editMoradorNip').value = p.nip || '';
+    document.getElementById('editMoradorPosto').value = p.posto || '';
+    document.getElementById('editMoradorNome').value = p.nomeCompleto || '';
+    document.getElementById('editMoradorNasc').value = p.dataNascimentoTitular || '';
+    document.getElementById('editMoradorCpf').value = p.cpf || '';
+    document.getElementById('editMoradorEndereco').value = p.endereco || p.enderecoPnr || '';
+
+    // 2. DEPENDENTES
+    const d = dados.dependentes || {};
+    document.getElementById('editDepNome').value = d.nomeDependente1 || '';
+    document.getElementById('editDepParentesco').value = d.grauParentesco || '';
+    document.getElementById('editDepTel').value = d.telefone || '';
+    document.getElementById('editDepOutros').value = d.outrosDependentes || '';
+
+    // 3. ANIMAIS
+    const a = dados.animais || {};
+    document.getElementById('editMoradorPossuiAnimal').value = a.possuiAnimal === 'Sim' ? 'Sim' : 'Não';
+    document.getElementById('editAnimalEspecie').value = a.especie || '';
+    document.getElementById('editAnimalNome').value = a.nomeAnimal || '';
+    document.getElementById('editAnimalVacinado').value = a.vacinacao === 'Sim' ? 'Sim' : 'Não';
+
+    // 4. STATUS
+    document.getElementById('editMoradorStatus').value = dados.statusVerificacao || 'Pendente';
+
     document.getElementById('modalEditarMorador').style.display = 'flex';
 };
 
@@ -1485,20 +1500,35 @@ window.salvarEdicaoMorador = async function(e) {
         const formStr = document.getElementById('formEditarMoradorSindico').dataset.dadosOriginais;
         if (!nip || !formStr) throw new Error("Dados incompletos");
         let dadosEdit = JSON.parse(formStr);
+        
+        // 1. DADOS PESSOAIS
         dadosEdit.dadosPessoais.posto = document.getElementById('editMoradorPosto').value;
         dadosEdit.dadosPessoais.nomeCompleto = document.getElementById('editMoradorNome').value;
+        dadosEdit.dadosPessoais.dataNascimentoTitular = document.getElementById('editMoradorNasc').value;
+        dadosEdit.dadosPessoais.cpf = document.getElementById('editMoradorCpf').value;
+        
         const endereco = document.getElementById('editMoradorEndereco').value;
-        const enderecoAntigo = JSON.parse(formStr).dadosPessoais.endereco || JSON.parse(formStr).dadosPessoais.enderecoPnr;
+        const enderecoAntigo = dadosEdit.dadosPessoais.endereco || dadosEdit.dadosPessoais.enderecoPnr;
         dadosEdit.dadosPessoais.endereco = endereco;
         dadosEdit.dadosPessoais.enderecoPnr = endereco;
-        const selDep = document.getElementById('editMoradorDependentes').value;
+
+        // 2. DEPENDENTES
         if (!dadosEdit.dependentes) dadosEdit.dependentes = {};
-        if (selDep === 'Não') dadosEdit.dependentes.nomeDependente1 = 'Não informado';
-        else if (selDep === 'Sim' && dadosEdit.dependentes.nomeDependente1 === 'Não informado') dadosEdit.dependentes.nomeDependente1 = 'Dependente Cadastrado';
-        const selAni = document.getElementById('editMoradorAnimais').value;
+        dadosEdit.dependentes.nomeDependente1 = document.getElementById('editDepNome').value || 'Não informado';
+        dadosEdit.dependentes.grauParentesco = document.getElementById('editDepParentesco').value || 'Não informado';
+        dadosEdit.dependentes.telefone = document.getElementById('editDepTel').value || 'Não informado';
+        dadosEdit.dependentes.outrosDependentes = document.getElementById('editDepOutros').value || 'Não informado';
+
+        // 3. ANIMAIS
         if (!dadosEdit.animais) dadosEdit.animais = {};
-        if (selAni === 'Nenhum') { dadosEdit.animais.possuiAnimal = 'Não'; dadosEdit.animais.especie = ''; }
-        else { dadosEdit.animais.possuiAnimal = 'Sim'; dadosEdit.animais.especie = selAni; }
+        dadosEdit.animais.possuiAnimal = document.getElementById('editMoradorPossuiAnimal').value;
+        dadosEdit.animais.especie = document.getElementById('editAnimalEspecie').value || 'Não informado';
+        dadosEdit.animais.nomeAnimal = document.getElementById('editAnimalNome').value || 'Não informado';
+        dadosEdit.animais.vacinacao = document.getElementById('editAnimalVacinado').value;
+
+        // 4. STATUS
+        dadosEdit.statusVerificacao = document.getElementById('editMoradorStatus').value;
+
         // Histórico de mudança de PNR
         if (endereco && endereco !== enderecoAntigo) {
             if (enderecoAntigo) await window.registrarHistoricoOcupacao(enderecoAntigo, nip, dadosEdit.dadosPessoais.nomeCompleto, 'saida');

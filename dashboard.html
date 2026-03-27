@@ -1055,69 +1055,141 @@
                     onclick="document.getElementById('modalEditarMorador').style.display='none'"></i>
             </div>
             <form id="formEditarMoradorSindico" onsubmit="salvarEdicaoMorador(event)">
-                <div class="form-group mb-3 mt-3">
-                    <label>NIP (Identificador único)</label>
-                    <input type="text" id="editMoradorNip" class="form-control"
-                        style="width:100%; border-radius:8px; border:1px solid var(--glass-border); padding:10px; background: #e2e8f0; cursor: not-allowed;"
-                        readonly required>
+                
+                <div style="background: rgba(10, 35, 66, 0.05); padding: 15px; border-radius: 8px; margin-top: 15px; margin-bottom: 20px;">
+                    <h4 style="margin-bottom: 15px; color: #0a2342; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;"><i class="ri-user-settings-line"></i> 1. Dados Pessoais</h4>
+                    <div class="form-group mb-3">
+                        <label>NIP (Identificador único)</label>
+                        <input type="text" id="editMoradorNip" class="form-control"
+                            style="width:100%; border-radius:8px; border:1px solid var(--glass-border); padding:10px; background: #e2e8f0; cursor: not-allowed;"
+                            readonly required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label>Posto/Graduação</label>
+                        <select id="editMoradorPosto" class="form-control"
+                            style="width:100%; border-radius:8px; border:1px solid var(--glass-border); padding:10px;"
+                            required>
+                            <option value="">Selecione...</option>
+                            <option value="Almirante">Almirante</option>
+                            <option value="Vice-Almirante">Vice-Almirante</option>
+                            <option value="Contra-Almirante">Contra-Almirante</option>
+                            <option value="Capitão de Mar e Guerra">Capitão de Mar e Guerra</option>
+                            <option value="Capitão de Fragata">Capitão de Fragata</option>
+                            <option value="Capitão de Corveta">Capitão de Corveta</option>
+                            <option value="Capitão-Tenente">Capitão-Tenente</option>
+                            <option value="Primeiro-Tenente">Primeiro-Tenente</option>
+                            <option value="Segundo-Tenente">Segundo-Tenente</option>
+                            <option value="Guarda-Marinha">Guarda-Marinha</option>
+                            <option value="Suboficial">Suboficial</option>
+                            <option value="Primeiro-Sargento">Primeiro-Sargento</option>
+                            <option value="Segundo-Sargento">Segundo-Sargento</option>
+                            <option value="Terceiro-Sargento">Terceiro-Sargento</option>
+                            <option value="Cabo">Cabo</option>
+                            <option value="Marinheiro">Marinheiro</option>
+                        </select>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label>Nome Completo</label>
+                        <input type="text" id="editMoradorNome" class="form-control"
+                            style="width:100%; border-radius:8px; border:1px solid var(--glass-border); padding:10px;"
+                            required>
+                    </div>
+                    <div class="form-group mb-3" style="display:flex; gap:10px;">
+                        <div style="flex:1;">
+                            <label>Data de Nasc. (Titular)</label>
+                            <input type="date" id="editMoradorNasc" class="form-control"
+                                style="width:100%; border-radius:8px; border:1px solid var(--glass-border); padding:10px;">
+                        </div>
+                        <div style="flex:1;">
+                            <label>CPF</label>
+                            <input type="text" id="editMoradorCpf" class="form-control" placeholder="000.000.000-00"
+                                style="width:100%; border-radius:8px; border:1px solid var(--glass-border); padding:10px;">
+                        </div>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label>Endereço / PNR</label>
+                        <input type="text" id="editMoradorEndereco" class="form-control"
+                            style="width:100%; border-radius:8px; border:1px solid var(--glass-border); padding:10px;"
+                            required>
+                    </div>
                 </div>
+
+                <div style="background: rgba(10, 35, 66, 0.05); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <h4 style="margin-bottom: 15px; color: #0a2342; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;"><i class="ri-group-line"></i> 2. Dependente Principal</h4>
+                    <div class="form-group mb-3">
+                        <label>Nome do Dependente</label>
+                        <input type="text" id="editDepNome" class="form-control"
+                            style="width:100%; border-radius:8px; border:1px solid var(--glass-border); padding:10px;">
+                    </div>
+                    <div class="form-group mb-3" style="display:flex; gap:10px;">
+                        <div style="flex:1;">
+                            <label>Parentesco</label>
+                            <select id="editDepParentesco" class="form-control"
+                                style="width:100%; border-radius:8px; border:1px solid var(--glass-border); padding:10px;">
+                                <option value="">Selecione...</option>
+                                <option value="Cônjuge">Cônjuge</option>
+                                <option value="Filho(a)">Filho(a)</option>
+                                <option value="Pai/Mãe">Pai/Mãe</option>
+                                <option value="Outro">Outro</option>
+                            </select>
+                        </div>
+                        <div style="flex:1;">
+                            <label>Telefone/WhatsApp</label>
+                            <input type="text" id="editDepTel" class="form-control" placeholder="(00) 00000-0000"
+                                style="width:100%; border-radius:8px; border:1px solid var(--glass-border); padding:10px;">
+                        </div>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label>Outros Dependentes (Relacionar)</label>
+                        <textarea id="editDepOutros" class="form-control" rows="2"
+                            style="width:100%; border-radius:8px; border:1px solid var(--glass-border); padding:10px; font-family: inherit; font-size: 0.9rem;"></textarea>
+                    </div>
+                </div>
+
+                <div style="background: rgba(10, 35, 66, 0.05); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <h4 style="margin-bottom: 15px; color: #0a2342; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;"><i class="ri-rest-time-line"></i> 3. Animais</h4>
+                    <div class="form-group mb-3" style="display:flex; gap:10px;">
+                        <div style="flex:1;">
+                            <label>Possui Animal?</label>
+                            <select id="editMoradorPossuiAnimal" class="form-control"
+                                style="width:100%; border-radius:8px; border:1px solid var(--glass-border); padding:10px;">
+                                <option value="Sim">Sim</option>
+                                <option value="Não">Não</option>
+                            </select>
+                        </div>
+                        <div style="flex:1;">
+                            <label>Espécie/Raça</label>
+                            <input type="text" id="editAnimalEspecie" class="form-control"
+                                style="width:100%; border-radius:8px; border:1px solid var(--glass-border); padding:10px;">
+                        </div>
+                    </div>
+                    <div class="form-group mb-3" style="display:flex; gap:10px;">
+                        <div style="flex:1;">
+                            <label>Nome do Animal</label>
+                            <input type="text" id="editAnimalNome" class="form-control"
+                                style="width:100%; border-radius:8px; border:1px solid var(--glass-border); padding:10px;">
+                        </div>
+                        <div style="flex:1;">
+                            <label>Vacinação em dia?</label>
+                            <select id="editAnimalVacinado" class="form-control"
+                                style="width:100%; border-radius:8px; border:1px solid var(--glass-border); padding:10px;">
+                                <option value="Sim">Sim</option>
+                                <option value="Não">Não</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="form-group mb-3">
-                    <label>Posto/Graduação</label>
-                    <select id="editMoradorPosto" class="form-control"
-                        style="width:100%; border-radius:8px; border:1px solid var(--glass-border); padding:10px;"
-                        required>
-                        <option value="">Selecione...</option>
-                        <option value="Almirante">Almirante</option>
-                        <option value="Vice-Almirante">Vice-Almirante</option>
-                        <option value="Contra-Almirante">Contra-Almirante</option>
-                        <option value="Capitão de Mar e Guerra">Capitão de Mar e Guerra</option>
-                        <option value="Capitão de Fragata">Capitão de Fragata</option>
-                        <option value="Capitão de Corveta">Capitão de Corveta</option>
-                        <option value="Capitão-Tenente">Capitão-Tenente</option>
-                        <option value="Primeiro-Tenente">Primeiro-Tenente</option>
-                        <option value="Segundo-Tenente">Segundo-Tenente</option>
-                        <option value="Guarda-Marinha">Guarda-Marinha</option>
-                        <option value="Suboficial">Suboficial</option>
-                        <option value="Primeiro-Sargento">Primeiro-Sargento</option>
-                        <option value="Segundo-Sargento">Segundo-Sargento</option>
-                        <option value="Terceiro-Sargento">Terceiro-Sargento</option>
-                        <option value="Cabo">Cabo</option>
-                        <option value="Marinheiro">Marinheiro</option>
+                    <label>Status de Cadastro</label>
+                    <select id="editMoradorStatus" class="form-control"
+                        style="width:100%; border-radius:8px; border:1px solid var(--glass-border); padding:10px; border-left: 4px solid #ed8936;">
+                        <option value="Pendente">Aguardando Verificação (Pendente)</option>
+                        <option value="Verificado">Cadastro Verificado</option>
                     </select>
                 </div>
-                <div class="form-group mb-3">
-                    <label>Nome Completo</label>
-                    <input type="text" id="editMoradorNome" class="form-control"
-                        style="width:100%; border-radius:8px; border:1px solid var(--glass-border); padding:10px;"
-                        required>
-                </div>
-                <div class="form-group mb-3">
-                    <label>Endereço / PNR</label>
-                    <input type="text" id="editMoradorEndereco" class="form-control"
-                        style="width:100%; border-radius:8px; border:1px solid var(--glass-border); padding:10px;"
-                        required>
-                </div>
-                <div class="form-group mb-3" style="display:flex; justify-content:space-between; gap:10px;">
-                    <div style="width: 100%;">
-                        <label>Dependentes?</label>
-                        <select id="editMoradorDependentes" class="form-control"
-                            style="width:100%; border-radius:8px; border:1px solid var(--glass-border); padding:10px;">
-                            <option value="Sim">Sim</option>
-                            <option value="Não">Não</option>
-                        </select>
-                    </div>
-                    <div style="width: 100%;">
-                        <label>Animais?</label>
-                        <select id="editMoradorAnimais" class="form-control"
-                            style="width:100%; border-radius:8px; border:1px solid var(--glass-border); padding:10px;">
-                            <option value="Cão">Cão</option>
-                            <option value="Gato">Gato</option>
-                            <option value="Outro">Outro</option>
-                            <option value="Nenhum">Nenhum</option>
-                        </select>
-                    </div>
-                </div>
-                <button type="submit" id="btnSalvarEdicaoMorador" class="btn btn-primary" style="width:100%; padding: 12px; margin-top: 10px;">Salvar Alterações</button>
+
+                <button type="submit" id="btnSalvarEdicaoMorador" class="btn btn-primary" style="width:100%; padding: 15px; margin-top: 10px; font-weight: bold; font-size: 1.1rem;">Salvar Todas as Alterações</button>
             </form>
         </div>
     </div>
