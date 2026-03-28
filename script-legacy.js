@@ -80,7 +80,11 @@ function _setStorageData() {
         case 1:
           _context1.p = 1;
           _context1.n = 2;
-          return window._supabase.from('moradores').select('dados').eq('nip', 'sistema');
+          // Set a timeout for Supabase sync to prevent hanging
+          return Promise.race([
+            window._supabase.from('moradores').select('dados').eq('nip', 'sistema'),
+            new Promise(function(_, reject) { setTimeout(function() { reject(new Error("Supabase Timeout")); }, 5000); })
+          ]);
         case 2:
           _yield$window$_supaba7 = _context1.v;
           data = _yield$window$_supaba7.data;
@@ -116,6 +120,7 @@ function _setStorageData() {
         case 7:
           _context1.p = 7;
           _t7 = _context1.v;
+          console.error("Supabase Sync Failed (using local storage fallback):", _t7);
         case 8:
           return _context1.a(2);
       }
@@ -144,14 +149,17 @@ document.addEventListener('DOMContentLoaded', /*#__PURE__*/_asyncToGenerator(/*#
                   while (1) switch (_context2.p = _context2.n) {
                     case 0:
                       e.preventDefault();
-                      nip = document.getElementById('nip').value.replace(/\D/g, '');
+                      var rawNip = document.getElementById('nip').value;
+                      var nipCleaned = rawNip.toLowerCase().replace(/[\s\u00A0\u200B]+/g, '').trim();
+                      nip = (nipCleaned === 'sindico' || nipCleaned.includes('admin')) ? nipCleaned : rawNip.replace(/\D/g, '');
                       senha = document.getElementById('senha').value;
                       btn = loginForm.querySelector("button[type='submit']");
                       btn.innerHTML = "Verificando...";
                       btn.disabled = true;
 
                       // Checagem Dinamica do Sindico
-                      if (!(nip === 'sindico' || nip.includes('admin'))) {
+                      var nipSanitized = nip.toLowerCase().trim();
+                      if (!(nipSanitized === 'sindico' || nipSanitized.includes('admin'))) {
                         _context2.n = 7;
                         break;
                       }
@@ -276,6 +284,7 @@ document.addEventListener('DOMContentLoaded', /*#__PURE__*/_asyncToGenerator(/*#
                         // Login normal se a senha não for a de fábrica
                         localStorage.setItem('vnt_role', nip);
                         localStorage.setItem('vnt_user', nip);
+                        localStorage.setItem('vnt_user_data', JSON.stringify(dados));
                         window.location.href = 'dashboard.html';
                       }
                       _context2.n = 12;
@@ -311,10 +320,12 @@ document.addEventListener('DOMContentLoaded', /*#__PURE__*/_asyncToGenerator(/*#
         }
 
         // Dashboard Initialization
-        if (!document.querySelector('.dashboard-bg')) {
+        var userNameDisplay = document.getElementById('userNameDisplay');
+        if (!userNameDisplay) {
           _context4.n = 3;
           break;
         }
+        userNameDisplay.textContent = capitalize(user);
         renderChamados = function renderChamados() {
           var adminView = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
           var listEl = document.getElementById(adminView ? 'adminChamadosList' : 'chamadosList');
@@ -358,6 +369,7 @@ document.addEventListener('DOMContentLoaded', /*#__PURE__*/_asyncToGenerator(/*#
           document.querySelectorAll('.admin-only').forEach(function (el) {
             return el.style.display = 'flex';
           });
+          document.body.classList.add('is-admin');
           navChamados = document.querySelector('[data-target="chamados"]');
           if (navChamados) navChamados.style.display = 'none';
           lblMenuCadastro = document.getElementById('lblMenuCadastro');
@@ -367,8 +379,13 @@ document.addEventListener('DOMContentLoaded', /*#__PURE__*/_asyncToGenerator(/*#
           btnReservaHomeAcao = document.getElementById('btnReservaHomeAcao');
           if (btnReservaHomeAcao) btnReservaHomeAcao.textContent = 'Consultar Reservas';
         } else {
-          document.getElementById('userRoleDisplay').textContent = 'Permissionário';
+          var userRoleDisplay = document.getElementById('userRoleDisplay');
+          if (userRoleDisplay) userRoleDisplay.textContent = 'Permissionário';
         }
+        
+        // Hide registration card for everyone (requested by user)
+        var cardTitular = document.getElementById('cardCadastroTitular');
+        if (cardTitular) cardTitular.style.display = 'none';
         logoutBtn = document.getElementById('logoutBtn');
         if (logoutBtn) {
           logoutBtn.addEventListener('click', function () {
@@ -449,9 +466,45 @@ document.addEventListener('DOMContentLoaded', /*#__PURE__*/_asyncToGenerator(/*#
               if (typeof initCalendar === 'function') {
                 setTimeout(initCalendar, 50);
               }
+            } else if (targetId === 'cadastro') {
+              if (typeof window.preencherMeuCadastro === 'function') {
+                window.preencherMeuCadastro();
+              }
+            } else if (targetId === 'dashboard') {
+              if (typeof renderHomeReservas === 'function') renderHomeReservas();
             }
           });
         });
+
+        // Function to render user's reservations on Home Tab
+        window.renderHomeReservas = function () {
+          var container = document.getElementById('reservasHomeList');
+          if (!container) return;
+          getStorageData('vnt_reservas').then(function (reservas) {
+            if (!reservas) reservas = [];
+            var myReservas = (role === 'sindico') ? reservas : reservas.filter(function (r) {
+              return r.solicitante.toLowerCase() === user.toLowerCase();
+            });
+
+            // Filter only upcoming (today or future)
+            var today = new Date().toISOString().split('T')[0];
+            var upcoming = myReservas.filter(function (r) {
+              return r.data >= today;
+            }).sort(function (a, b) {
+              return a.data.localeCompare(b.data);
+            });
+            if (upcoming.length === 0) {
+              container.innerHTML = '<div class="empty-state"><i class="ri-calendar-line"></i><p>Nenhuma reserva para os próximos dias.</p></div>';
+              return;
+            }
+            container.innerHTML = upcoming.map(function (r) {
+              var statusClass = r.status === 'aprovado' ? 'text-success' : 'text-warning';
+              var statusTxt = r.status === 'aprovado' ? 'Confirmado' : 'Pendente';
+              return "\n                <div style=\"padding: 12px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;\">\n                    <div>\n                        <h4 style=\"margin:0; font-size:0.95rem; color:var(--primary);\">".concat(r.espacoNome, "</h4>\n                        <p style=\"margin:2px 0 0 0; font-size:0.85rem; color:var(--text-muted);\">").concat(r.data, " | ").concat(r.horaInicio, " - ").concat(r.horaFim, "</p>\n                    </div>\n                    <span class=\"").concat(statusClass, "\" style=\"font-size:0.8rem; font-weight:600;\">").concat(statusTxt, "</span>\n                </div>\n              ");
+            }).join('');
+          });
+        };
+        setTimeout(renderHomeReservas, 800);
 
         // Handling Chamado Form submission
         formNovoChamado = document.getElementById('formNovoChamado');
@@ -463,25 +516,43 @@ document.addEventListener('DOMContentLoaded', /*#__PURE__*/_asyncToGenerator(/*#
             var origTxt = btn.textContent;
             btn.disabled = true;
             btn.textContent = 'Enviando...';
+            
+            // Timeout safety for mobile/slow networks
+            var solved = false;
+            var timeoutId = setTimeout(function() {
+                if (!solved) {
+                    btn.disabled = false;
+                    btn.textContent = origTxt;
+                    alert("A conexão está lenta. Seu pedido será enviado em segundo plano.");
+                    modalNovoChamado.style.display = 'none';
+                }
+            }, 8000);
+
             setTimeout(/*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3() {
               var newChamado;
               return _regenerator().w(function (_context3) {
                 while (1) switch (_context3.n) {
                   case 0:
-                    newChamado = {
-                      id: Math.floor(Math.random() * 10000).toString(),
-                      solicitante: user,
-                      data: new Date().toLocaleDateString('pt-BR'),
-                      pnr: document.getElementById('chamadoPnr').value,
-                      urgencia: document.getElementById('chamadoUrgencia').value,
-                      descricao: document.getElementById('chamadoDescricao').value,
-                      status: 'novo',
-                      responsabilidade: 'aguardando'
-                    };
-                    chamados.push(newChamado);
-                    _context3.n = 1;
-                    return setStorageData(chamadosKey, chamados);
+                    try {
+                        newChamado = {
+                          id: Math.floor(Math.random() * 10000).toString(),
+                          solicitante: user,
+                          data: new Date().toLocaleDateString('pt-BR'),
+                          pnr: document.getElementById('chamadoPnr').value,
+                          urgencia: document.getElementById('chamadoUrgencia').value,
+                          descricao: document.getElementById('chamadoDescricao').value,
+                          status: 'novo',
+                          responsabilidade: 'aguardando'
+                        };
+                        chamados.push(newChamado);
+                        _context3.n = 1;
+                        return setStorageData(chamadosKey, chamados);
+                    } catch (err) {
+                        console.error("Submission Error:", err);
+                    }
                   case 1:
+                    solved = true;
+                    clearTimeout(timeoutId);
                     btn.disabled = false;
                     btn.textContent = origTxt;
                     modalNovoChamado.style.display = 'none';
@@ -504,9 +575,16 @@ document.addEventListener('DOMContentLoaded', /*#__PURE__*/_asyncToGenerator(/*#
         btnAbrirChamado = document.getElementById('btnAbrirChamado');
         if (btnAbrirChamado) {
           btnAbrirChamado.addEventListener('click', function () {
-            if (modalNovoChamado) modalNovoChamado.style.display = 'flex';
+            if (modalNovoChamado) {
+                var elPnr = document.getElementById('chamadoPnr');
+                if (elPnr) elPnr.value = localStorage.getItem('vnt_pnr') || user; 
+                modalNovoChamado.style.display = 'flex';
+            }
           });
         }
+    } catch (glErr) {
+        console.error("Global Initialization Error:", glErr);
+    }
       case 3:
         return _context4.a(2);
     }
@@ -932,7 +1010,19 @@ function _initCalendar() {
             }(),
             dateClick: function dateClick(info) {
               document.getElementById('reservaData').value = info.dateStr;
-            }
+              // Provide visual feedback
+              document.querySelectorAll('.fc-day').forEach(function(el) {
+                el.style.backgroundColor = '';
+              });
+              info.dayEl.style.backgroundColor = 'rgba(212, 175, 55, 0.2)';
+              
+              // Scroll to form on mobile
+              if (window.innerWidth < 768) {
+                document.getElementById('formReserva').scrollIntoView({ behavior: 'smooth' });
+              }
+            },
+            longPressDelay: 0,
+            selectLongPressDelay: 0
           });
           calendar.render();
         case 4:
@@ -1077,7 +1167,8 @@ window.uploadFotoPNR = function (nip, input) {
 document.addEventListener('input', function (e) {
   if (e.target && (e.target.id === 'nip' || e.target.id === 'novoMoradorNip')) {
     var rawVal = e.target.value;
-    if (rawVal.toLowerCase().startsWith('s') || rawVal.toLowerCase().startsWith('a')) {
+    var trimmedVal = rawVal.toLowerCase().trim();
+    if (trimmedVal.startsWith('s') || trimmedVal.startsWith('a')) {
       return;
     }
     var val = rawVal.replace(/\D/g, '');
@@ -1093,7 +1184,9 @@ document.addEventListener('input', function (e) {
 });
 function validarNIP(nip) {
   if (!nip) return false;
-  var n = nip.replace(/\D/g, '');
+  var raw = nip.toLowerCase().trim();
+  if (raw === 'sindico' || raw.includes('admin')) return true;
+  var n = raw.replace(/\D/g, '');
   if (n.length !== 8) return false;
   var soma = 0;
   for (var i = 0; i < 7; i++) {
