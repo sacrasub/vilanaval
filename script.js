@@ -3,6 +3,20 @@ const supabaseUrl = 'https://jzvoxaqhteqdfyurjlbk.supabase.co';
 const supabaseKey = 'sb_publishable_hKgmUqtu7Wrfo1A5z0fiUg_xy4pLT9H';
 window._supabase = window.supabase ? window.supabase.createClient(supabaseUrl, supabaseKey) : null;
 
+// --- Security Helpers ---
+async function hashPassword(password) {
+    if (!password) return '';
+    // If it's already a SHA-256 hash (64 hex chars), return as is
+    if (password.length === 64 && /^[0-9a-f]+$/.test(password)) return password;
+    
+    const msgUint8 = new TextEncoder().encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashHex;
+}
+
+
 
 // --- Supabase Storage Wrapper ---
 async function getStorageData(key) {
@@ -51,28 +65,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const nip = document.getElementById('nip').value.toLowerCase();
-            const senha = document.getElementById('senha').value;
+            const nip = document.getElementById('nip').value.toLowerCase().trim();
+            const senha = document.getElementById('senha').value.trim();
             const btn = loginForm.querySelector("button[type='submit']");
 
             btn.innerHTML = "Verificando...";
             btn.disabled = true;
 
             try {
+                const hashedInput = await hashPassword(senha);
+
                 // Checagem Dinamica do Sindico
                 if (nip === 'sindico' || nip.includes('admin')) {
-                    let validPwd = 'sindico';
+                    let validPwdHash = await hashPassword('sindico'); // Default
                     try {
                         if (window._supabase) {
                             const { data, error } = await window._supabase.from('moradores').select('dados').eq('nip', 'sindico');
                             if (data && data.length > 0 && data[0].dados && data[0].dados.senha) {
-                                validPwd = data[0].dados.senha.trim();
+                                validPwdHash = data[0].dados.senha.trim();
                             }
                         }
                     } catch (e) {
                         console.error("Erro consultando supabase para sindico:", e);
                     }
-                    if (senha.trim() !== validPwd) {
+                    
+                    if (hashedInput !== validPwdHash && senha.trim() !== validPwdHash) {
                         alert("Senha do Síndico Incorreta!");
                         btn.innerHTML = 'Acessar <i class="ri-arrow-right-line"></i>';
                         btn.disabled = false;
@@ -100,30 +117,37 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const moradorData = data[0];
                         const dados = moradorData.dados || {};
                         const senhaBanco = dados.senha || 'marinha123';
+                        const hashedPadrao = await hashPassword('marinha123');
 
-                        if (senha !== senhaBanco) {
+                        // Compare hashed input with stored hash OR plain text (for migration period)
+                        if (hashedInput !== senhaBanco && senha !== senhaBanco) {
                             alert("Senha Incorreta!");
                             btn.innerHTML = 'Acessar <i class="ri-arrow-right-line"></i>';
                             btn.disabled = false;
                             return;
                         }
 
-                        if (senhaBanco === 'marinha123') {
+                        if (senhaBanco === 'marinha123' || senhaBanco === hashedPadrao) {
                             // FORÇA MUDANÇA DE SENHA
                             const modal = document.getElementById('modalMudarSenha');
                             if (modal) {
                                 modal.style.display = 'flex';
                                 document.getElementById('btnSalvarSenha').onclick = async () => {
                                     const novaSenha = document.getElementById('novaSenha').value;
+                                    const novaSenhaConf = document.getElementById('novaSenhaConf').value;
                                     if (novaSenha.length < 6) {
                                         alert("A senha deve ter no mínimo 6 caracteres para ser segura.");
+                                        return;
+                                    }
+                                    if (novaSenha !== novaSenhaConf) {
+                                        alert("A confirmação não coincide com a nova senha digitada.");
                                         return;
                                     }
                                     const btnSalvar = document.getElementById('btnSalvarSenha');
                                     btnSalvar.innerHTML = "Salvando...";
                                     btnSalvar.disabled = true;
 
-                                    dados.senha = novaSenha;
+                                    dados.senha = await hashPassword(novaSenha);
                                     await window._supabase.from('moradores').update({ dados: dados }).eq('nip', nip);
 
                                     localStorage.setItem('vnt_role', nip);
@@ -132,7 +156,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 };
                             }
                         } else {
-                            // Login normal se a senha não for a de fábrica
+                            // Login normal
                             localStorage.setItem('vnt_role', nip);
                             localStorage.setItem('vnt_user', nip);
                             window.location.href = 'dashboard.html';
@@ -318,6 +342,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (typeof initCalendar === 'function') {
                         setTimeout(initCalendar, 50);
                     }
+                } else if (targetId === 'relatorio-sindico') {
+                    if (typeof loadRelatorioMensal === 'function') setTimeout(() => loadRelatorioMensal(), 50);
                 }
             });
         });
@@ -1553,5 +1579,218 @@ window.imprimirFichaCadastro = async function (nipTarget = null) {
         if (!printWindow) return alert('Autorize popups neste site para gerar o documento.');
         printWindow.document.write(html);
         printWindow.document.close();
+    }
+}
+
+// --- Password Management Functions ---
+
+window.abrirModalSenhaDashboard = function() {
+    const m = document.getElementById('modalSenhaDashboard');
+    if(m) m.style.display = 'flex';
+}
+
+window.fecharModalSenhaDashboard = function() {
+    const m = document.getElementById('modalSenhaDashboard');
+    if(m) m.style.display = 'none';
+}
+
+window.confirmarMudarSenhaDashboard = async function() {
+    const input = document.getElementById('novaSenhaInputDash');
+    const inputConf = document.getElementById('novaSenhaInputDashConf');
+    const novaSenha = input.value;
+    const novaSenhaConf = inputConf.value;
+    const btn = document.getElementById('btnConfirmaNovaSenha');
+    
+    if(novaSenha.length < 6) {
+        alert("A senha precisa ter pelo menos 6 caracteres.");
+        return;
+    }
+    if (novaSenha !== novaSenhaConf) {
+        alert("A confirmação não coincide com a nova senha digitada.");
+        return;
+    }
+    
+    const nip = localStorage.getItem('vnt_role');
+    if(!window._supabase) {
+        alert("Falha de conexão com a Base de Dados. Tente novamente.");
+        return;
+    }
+    
+    btn.innerHTML = 'Salvando...';
+    btn.disabled = true;
+    try {
+        const hashedPwd = await hashPassword(novaSenha);
+        const { data, error } = await window._supabase.from('moradores').select('*').eq('nip', nip);
+        
+        if(data && data.length > 0) {
+            let dados = data[0].dados || {};
+            dados.senha = hashedPwd;
+            await window._supabase.from('moradores').update({ dados: dados }).eq('nip', nip);
+            alert("Senha alterada com sucesso!");
+        } else if (nip === 'sindico') {
+            // Initializing sindico record if missing
+            const mockData = { nome: 'Síndico', senha: hashedPwd };
+            await window._supabase.from('moradores').insert([{ nip: 'sindico', dados: mockData }]);
+            alert("Senha do Síndico alterada e cadastrada com sucesso!");
+        } else {
+            alert("Erro ao localizar seu registro no banco de dados.");
+        }
+        input.value = '';
+        inputConf.value = '';
+        fecharModalSenhaDashboard();
+    } catch(e) {
+        console.error("Erro ao mudar senha:", e);
+        alert("Erro fatal ao salvar senha.");
+    } finally {
+        btn.innerHTML = 'Salvar Modificação';
+        btn.disabled = false;
+    }
+}
+
+window.resetarSenhaMorador = async function(nipTarget, nome) {
+    if(!confirm(`ATENÇÃO: Você tem certeza que deseja RESETAR a senha do morador ${nome} (NIP: ${nipTarget}) para o padrão "marinha123"? Isso exigirá que ele crie uma nova senha no próximo acesso.`)) return;
+
+    if(!window._supabase) {
+        alert("Sistema Offline. Tente Novamente.");
+        return;
+    }
+    
+    try {
+        const { data, error } = await window._supabase.from('moradores').select('*').eq('nip', nipTarget);
+        if(data && data.length > 0) {
+            let dados = data[0].dados || {};
+            // Reset to hashed default
+            dados.senha = await hashPassword("marinha123");
+            await window._supabase.from('moradores').update({ dados: dados }).eq('nip', nipTarget);
+            alert("Sucesso! A senha de " + nome + " foi completamente restaurada para marinha123.");
+        } else {
+            alert("Morador não encontrado no banco.");
+        }
+    } catch (e) {
+        console.error("Erro ao resetar senha:", e);
+        alert("Falha ao comunicar com o servidor.");
+    }
+}
+
+window.togglePwd = function(inputId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon = document.getElementById(iconId);
+    if(input && icon) {
+        if(input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('ri-eye-line');
+            icon.classList.add('ri-eye-off-line');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('ri-eye-off-line');
+            icon.classList.add('ri-eye-line');
+        }
+    }
+}
+
+// --- ANEXO H: Relatório Mensal do Síndico ---
+
+window.loadRelatorioMensal = async function() {
+    const mes = document.getElementById('relatorioMes')?.value;
+    const ano = document.getElementById('relatorioAno')?.value;
+    const tbody = document.getElementById('tbodyRelatorioPnrs');
+    const areasComuns = document.getElementById('relatorioAreasComuns');
+    const ocorrencias = document.getElementById('relatorioOcorrencias');
+    
+    if (!mes || !ano || !tbody) return;
+
+    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px;">Carregando dados...</td></tr>';
+
+    try {
+        // 1. Get all residents for PNR list
+        if (!window._supabase) {
+             tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px;">Supabase não conectado.</td></tr>';
+             return;
+        }
+        const { data: moradores, error: morError } = await window._supabase.from('moradores').select('*');
+        if (morError) throw morError;
+        
+        // 2. Get existing report for this month/year
+        const storageKey = `relatorio_mensal_${ano}_${mes}`;
+        const existingReport = await getStorageData(storageKey);
+
+        // 3. Render PNRs
+        const residentsWithPnr = moradores.filter(m => m.dados && m.dados.endereco);
+        residentsWithPnr.sort((a, b) => a.dados.endereco.localeCompare(b.dados.endereco));
+
+        if (residentsWithPnr.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px;">Nenhum PNR ocupado no momento.</td></tr>';
+        } else {
+            tbody.innerHTML = residentsWithPnr.map(m => {
+                const pnrName = m.dados.endereco;
+                const savedData = (existingReport && existingReport.pnrs) ? existingReport.pnrs.find(p => p.pnr === pnrName) : null;
+                const currentStatus = savedData ? savedData.status : 'Vistoriado';
+                const currentObs = savedData ? savedData.obs : '';
+
+                return `
+                    <tr>
+                        <td style="padding:10px; border-bottom:1px solid #edf2f7;">${pnrName}</td>
+                        <td style="padding:10px; border-bottom:1px solid #edf2f7;">
+                            <select class="pnr-status-select" data-pnr="${pnrName}" style="width:100%; border:1px solid #e2e8f0; border-radius:4px; padding:5px;">
+                                <option value="Vistoriado" ${currentStatus === 'Vistoriado' ? 'selected' : ''}>Vistoriado</option>
+                                <option value="Problema" ${currentStatus === 'Problema' ? 'selected' : ''}>Problema</option>
+                                <option value="Manutenção" ${currentStatus === 'Manutenção' ? 'selected' : ''}>Manutenção</option>
+                            </select>
+                        </td>
+                        <td style="padding:10px; border-bottom:1px solid #edf2f7;">
+                            <input type="text" class="pnr-obs-input" data-pnr="${pnrName}" value="${currentObs}" placeholder="Sem alterações" style="width:100%; border:none; background:transparent; border-bottom:1px dashed #cbd5e1;">
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // 4. Fill other fields
+        if (areasComuns) areasComuns.value = existingReport?.areasComuns || '';
+        if (ocorrencias) ocorrencias.value = existingReport?.ocorrencias || '';
+
+    } catch (e) {
+        console.error("Erro ao carregar relatório:", e);
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:red; padding:20px;">Falha ao carregar relatório mensal.</td></tr>';
+    }
+}
+
+window.saveRelatorioMensal = async function() {
+    const mes = document.getElementById('relatorioMes')?.value;
+    const ano = document.getElementById('relatorioAno')?.value;
+    const btn = document.getElementById('btnSalvarRelatorio');
+    if (!mes || !ano || !btn) return;
+
+    btn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Salvando...';
+    btn.disabled = true;
+
+    try {
+        const pnrs = [];
+        document.querySelectorAll('.pnr-status-select').forEach(select => {
+            const pnrName = select.getAttribute('data-pnr');
+            const status = select.value;
+            const obsInput = document.querySelector(`.pnr-obs-input[data-pnr="${pnrName}"]`);
+            pnrs.push({ pnr: pnrName, status: status, obs: obsInput ? obsInput.value : '' });
+        });
+
+        const payload = {
+            mes: mes,
+            ano: ano,
+            pnrs: pnrs,
+            areasComuns: document.getElementById('relatorioAreasComuns').value,
+            ocorrencias: document.getElementById('relatorioOcorrencias').value,
+            updatedAt: new Date().toISOString()
+        };
+
+        const storageKey = `relatorio_mensal_${ano}_${mes}`;
+        await setStorageData(storageKey, payload);
+
+        alert(`Relatório de ${mes}/${ano} salvo com sucesso!`);
+    } catch (e) {
+        console.error("Erro ao salvar relatório:", e);
+        alert("Erro ao salvar relatório mensal.");
+    } finally {
+        btn.innerHTML = '<i class="ri-save-line"></i> Salvar e Assinar Relatório';
+        btn.disabled = false;
     }
 }

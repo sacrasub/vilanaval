@@ -43,8 +43,9 @@
                 <a href="#" class="nav-item" data-target="reservas">
                     <i class="ri-calendar-check-line"></i> <span>Reservas</span>
                 </a>
-                <a href="#" class="nav-item" data-target="chamados">
+                <a href="#" class="nav-item" data-target="chamados" id="navChamadosItem">
                     <i class="ri-tools-line"></i> <span>Meus Chamados</span>
+                    <span id="badgeChamados" style="display:none; background:#e53e3e; color:white; border-radius:50%; font-size:0.7rem; font-weight:700; padding:1px 6px; margin-left:auto;">0</span>
                 </a>
                 <a href="#" class="nav-item" data-target="normas">
                     <i class="ri-file-text-line"></i> <span>Normas da Vila</span>
@@ -70,6 +71,15 @@
                     </a>
                     <a href="#" class="nav-item" data-target="admin-lista">
                         <i class="ri-list-check"></i> <span>Lista de Moradores</span>
+                    </a>
+                    <a href="#" class="nav-item" data-target="relatorio-sindico">
+                        <i class="ri-file-chart-line"></i> <span>Relatório Mensal</span>
+                    </a>
+                    <a href="#" class="nav-item" data-target="financeiro">
+                        <i class="ri-money-dollar-circle-line"></i> <span>Financeiro</span>
+                    </a>
+                    <a href="#" class="nav-item" data-target="mural-admin">
+                        <i class="ri-megaphone-line"></i> <span>Gerir Avisos</span>
                     </a>
                     <a href="#" class="nav-item" data-target="admin">
                         <i class="ri-settings-4-line"></i> <span>Ajustes Gerais</span>
@@ -97,6 +107,8 @@
                     <p class="subtitle">Tabatinga - AM</p>
                 </div>
                 <div class="header-actions">
+                    <button class="icon-btn" onclick="abrirModalSenhaDashboard()" title="Alterar Senha"><i class="ri-lock-password-line"></i></button>
+                    <button class="icon-btn mobile-logout" onclick="document.getElementById('logoutBtn').click()" title="Sair"><i class="ri-logout-box-r-line"></i></button>
                     <button class="icon-btn"><i class="ri-search-line"></i></button>
                     <button class="icon-btn notification-badge"><i class="ri-bell-line"></i></button>
                 </div>
@@ -157,7 +169,7 @@
                                     onclick="document.querySelector('[data-target=\'reservas\']').click()">Nova
                                     Reserva</button>
                             </div>
-                            <div class="card-body">
+                            <div class="card-body" id="reservasHomeList">
                                 <div class="empty-state">
                                     <i class="ri-calendar-line"></i>
                                     <p>Nenhuma reserva para os próximos dias.</p>
@@ -189,20 +201,12 @@
                                 <li>O grupo destina-se exclusivamente a assuntos da Vila Naval.</li>
                             </ul>
 
-                            <div class="mt-4 alert-info"
-                                style="padding: 15px; border-radius: 8px; border: 1px solid #bee3f8; background-color: #ebf8ff;">
-                                <strong>⚓ Formulário de Comunicação:</strong> Para enviar sugestões, tirar dúvidas ou
-                                tratar com a Administração, utilize o nosso canal oficial.
-                                <br><br>
-                                <a href="https://forms.gle/p2iqU1uZRWDrxLCW7" target="_blank" class="btn btn-primary"><i
-                                        class="ri-links-line"></i> Acessar Formulário de Comunicação</a>
-                            </div>
                         </div>
                     </div>
 
-                    <div class="card glass-panel" style="border: 2px solid #e53e3e;">
+                    <div id="cardCadastroTitular" class="card glass-panel" style="border: 2px solid #e53e3e;">
                         <div class="card-header" style="background-color: #fff5f5;">
-                            <h3><i class="ri-file-user-line text-danger"></i> Cadastro de Moradores (Prazo: 05/03/2026)
+                            <h3><i class="ri-file-user-line text-danger"></i> Cadastro de Moradores (Prazo: 05/04/2026)
                             </h3>
                         </div>
                         <div class="card-body">
@@ -215,7 +219,7 @@
                                 <li>Informações sobre animais de estimação</li>
                                 <li>Aceite dos termos de compromisso</li>
                             </ul>
-                            <a href="#" onclick="document.querySelector('[data-target=\'cadastro\']').click()"
+                            <a href="https://sacrasub.github.io/-formulario-moradores-apvnt-/" target="_blank"
                                 class="btn btn-primary mt-4" style="background-color: var(--primary);"><i
                                     class="ri-survey-line"></i> Ir para o Cadastro de Moradores</a>
                         </div>
@@ -224,7 +228,7 @@
 
                 <!-- Reservas Tab -->
                 <section id="reservas" class="tab-pane">
-                    <div style="display: grid; grid-template-columns: 3fr 2fr; gap: 20px; align-items: start;">
+                    <div class="reservas-grid">
                         <!-- Calendário -->
                         <div class="card glass-panel" style="background:#fff;">
                             <div class="card-header">
@@ -554,55 +558,60 @@
                     <div class="card-body">
                         <form>
                             <div class="form-group mb-3">
-                                <label>Mês de Referência</label>
-                                <input type="month" onclick="this.showPicker()" class="form-control"
-                                    style="width:100%; border-radius:8px; border:1px solid #e2e8f0; padding:10px;"
-                                    required>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; background: rgba(10, 35, 66, 0.05); padding: 15px; border-radius: 8px;">
+                                <div style="display:flex; gap:10px; align-items:center;">
+                                    <i class="ri-calendar-line" style="font-size: 1.5rem; color: var(--primary);"></i>
+                                    <div>
+                                        <label style="display:block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">Mês de Referência</label>
+                                        <div style="display:flex; gap:5px;">
+                                            <select id="relatorioMes" style="border:none; background:transparent; font-weight:700; font-size:1.1rem; color:var(--primary); cursor:pointer;" onchange="window.loadRelatorioMensal()">
+                                                <option value="01">Janeiro</option><option value="02">Fevereiro</option><option value="03">Março</option>
+                                                <option value="04">Abril</option><option value="05">Maio</option><option value="06">Junho</option>
+                                                <option value="07">Julho</option><option value="08">Agosto</option><option value="09">Setembro</option>
+                                                <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+                                            </select>
+                                            <select id="relatorioAno" style="border:none; background:transparent; font-weight:700; font-size:1.1rem; color:var(--primary); cursor:pointer;" onchange="window.loadRelatorioMensal()">
+                                                <option value="2025">2025</option><option value="2026">2026</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline" onclick="window.loadRelatorioMensal()"><i class="ri-refresh-line"></i> Carregar</button>
                             </div>
 
                             <h4>1. PNRs Verificadas e Condições</h4>
-                            <table style="width:100%; border-collapse:collapse; margin-bottom: 20px;">
-                                <tr style="background:#f7fafc; text-align:left;">
-                                    <th style="padding:10px; border-bottom:1px solid #cbd5e1;">PNR</th>
-                                    <th style="padding:10px; border-bottom:1px solid #cbd5e1;">Status</th>
-                                    <th style="padding:10px; border-bottom:1px solid #cbd5e1;">Observações</th>
-                                </tr>
-                                <tr>
-                                    <td style="padding:10px; border-bottom:1px solid #edf2f7;">Ed. SG Lisboa - Apto 101
-                                    </td>
-                                    <td style="padding:10px; border-bottom:1px solid #edf2f7;"><span class="badge"
-                                            style="background:#c6f6d5; color:#22543d;">Vistoriado</span></td>
-                                    <td style="padding:10px; border-bottom:1px solid #edf2f7;"><input type="text"
-                                            placeholder="Sem alterações"
-                                            style="width:100%; border:none; background:transparent;"></td>
-                                </tr>
-                                <tr>
-                                    <td style="padding:10px; border-bottom:1px solid #edf2f7;">Casa 01</td>
-                                    <td style="padding:10px; border-bottom:1px solid #edf2f7;"><span class="badge"
-                                            style="background:#fed7d7; color:#c53030;">Problema Identificado</span></td>
-                                    <td style="padding:10px; border-bottom:1px solid #edf2f7;"><input type="text"
-                                            value="Pintura descascando na fachada"
-                                            style="width:100%; border:none; background:transparent;"></td>
-                                </tr>
-                            </table>
+                            <div style="overflow-x:auto;">
+                                <table style="width:100%; border-collapse:collapse; margin-bottom: 20px;" id="tableRelatorioPnrs">
+                                    <thead>
+                                        <tr style="background:#f7fafc; text-align:left;">
+                                            <th style="padding:10px; border-bottom:1px solid #cbd5e1;">PNR</th>
+                                            <th style="padding:10px; border-bottom:1px solid #cbd5e1;">Status</th>
+                                            <th style="padding:10px; border-bottom:1px solid #cbd5e1;">Observações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbodyRelatorioPnrs">
+                                        <!-- Will be populated by script.js -->
+                                    </tbody>
+                                </table>
+                            </div>
 
                             <h4>2. Áreas Comuns</h4>
                             <div class="form-group mb-3">
-                                <textarea rows="3"
+                                <textarea id="relatorioAreasComuns" rows="3"
                                     style="width:100%; border-radius:8px; border:1px solid #e2e8f0; padding:10px;"
                                     placeholder="Relate o estado do Clube, salão de festas e áreas recreativas..."></textarea>
                             </div>
 
                             <h4>3. Ocorrências Excepcionais</h4>
                             <div class="form-group mb-3">
-                                <textarea rows="3"
+                                <textarea id="relatorioOcorrencias" rows="3"
                                     style="width:100%; border-radius:8px; border:1px solid #e2e8f0; padding:10px;"
                                     placeholder="Relate quebras de regra, intervenções urgentes ou atividades anômalas..."></textarea>
                             </div>
 
-                            <button type="button" class="btn btn-primary" style="width:100%;"
-                                onclick="alert('Relatório Salvo no Sistema. (Mock)')"><i class="ri-save-line"></i>
-                                Salvar e Assinar Relatório</button>
+                            <button type="button" id="btnSalvarRelatorio" class="btn btn-primary" style="width:100%;"
+                                onclick="window.saveRelatorioMensal()">
+                                <i class="ri-save-line"></i> Salvar e Assinar Relatório</button>
                         </form>
                     </div>
                 </div>
@@ -638,7 +647,10 @@
                 <section id="cadastro" class="tab-pane">
                     <div class="card glass-panel">
                         <div class="card-body" style="padding:40px;">
-                            <h2>Cadastro de Moradores</h2>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                                <h2>Meu Cadastro</h2>
+                                <button type="button" onclick="window.baixarFichaPDF()" class="btn btn-outline" style="color:var(--primary);"><i class="ri-file-download-line"></i> Imprimir / PDF</button>
+                            </div>
                             <form id="cadastroForm">
                                 <!-- Seção 1: Dados Pessoais -->
                                 <section class="form-group">
@@ -757,7 +769,7 @@
 
         <div class="field">
             <label for="grauParentesco">Grau de Parentesco</label>
-            <input type="text" id="grauParentesco" name="grauParentesco" placeholder="Ex: Cà´njuge, Filho(a)">
+            <input type="text" id="grauParentesco" name="grauParentesco" placeholder="Ex: Cônjuge, Filho(a)">
         </div>
 
         <div class="field">
@@ -868,18 +880,18 @@
     </section>
 
     <div id="validationErrors" class="validation-errors" style="display: none;">
-        <h3>âš ï¸ Campos obrigatórios não preenchidos:</h3>
+        <h3>⚠️ Campos obrigatórios não preenchidos:</h3>
         <ul id="errorList"></ul>
     </div>
 
-    <button type="submit" class="submit-btn">ðŸ“¤ Enviar Cadastro</button>
+    <button type="submit" class="submit-btn">📤 Enviar Cadastro</button>
     </form>
     </div>
 
     <!-- Seção de Resumo (oculta inicialmente) -->
     <div id="summarySection" class="summary-section" style="display: none;">
         <div class="success-header">
-            <div class="success-icon">âœ“</div>
+            <div class="success-icon">✓</div>
             <h2>Cadastro Enviado com Sucesso!</h2>
             <p>Confira abaixo as informações enviadas:</p>
         </div>
@@ -1132,7 +1144,7 @@
                             <label>Parentesco</label>
                             <input type="text" id="editDepParentesco" class="form-control"
                                 style="width:100%; border-radius:8px; border:1px solid var(--glass-border); padding:10px;"
-                                placeholder="Cà´njuge, Filho, etc.">
+                                placeholder="Cônjuge, Filho, etc.">
                         </div>
                         <div style="flex:1;">
                             <label>Telefone/WhatsApp</label>
@@ -1247,6 +1259,36 @@
                 </div>
             </div>
             
+        </div>
+    </div>
+
+    <!-- Modal Novo Chamado -->
+    <div id="modalNovoChamado" class="modal-overlay" style="display:none; z-index: 2000;">
+        <div class="modal-content glass-panel" style="max-width: 500px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>Abrir Novo Chamado</h3>
+                <i class="ri-close-line" style="cursor:pointer; font-size:1.5rem;"
+                    onclick="document.getElementById('modalNovoChamado').style.display='none'"></i>
+            </div>
+            <form id="formNovoChamado">
+                <div class="form-group">
+                    <label>PNR / Endereço</label>
+                    <input type="text" id="chamadoPnr" readonly>
+                </div>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label>Tipo / Urgência</label>
+                    <select id="chamadoUrgencia" required style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--glass-border);">
+                        <option value="Baixa">Baixa (Rotina)</option>
+                        <option value="Média">Média (Reparo necessário)</option>
+                        <option value="Alta">Alta (Urgência - Vazamento/Elétrica)</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label>Descrição do Problema</label>
+                    <textarea id="chamadoDescricao" rows="4" required placeholder="Descreva detalhadamente o problema..." style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--glass-border);"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%; margin-top:20px;">Registrar Pedido</button>
+            </form>
         </div>
     </div>
 

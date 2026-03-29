@@ -541,4 +541,71 @@ window.baixarFichaPDF = async function() {
     } else {
         alert("Erro: Biblioteca PDF não carregada.");
     }
-}
+};
+
+// NOVO: Preencher o formulário com dados do usuário logado
+window.preencherMeuCadastro = function() {
+    const userDataRaw = localStorage.getItem('vnt_user_data');
+    if (!userDataRaw) return;
+    try {
+        const userData = JSON.parse(userDataRaw);
+        const form = document.getElementById('cadastroForm');
+        if (!form) return;
+
+        console.log("Preenchendo formulário com:", userData);
+
+        // Preencher Dados Pessoais
+        if (userData.dadosPessoais) {
+            if (form.posto) form.posto.value = userData.dadosPessoais.posto || '';
+            if (form.nomeCompleto) form.nomeCompleto.value = userData.dadosPessoais.nomeCompleto || '';
+            if (form.nomeGuerra) form.nomeGuerra.value = userData.dadosPessoais.nomeGuerra || '';
+            if (form.nip) form.nip.value = userData.dadosPessoais.nip || '';
+            if (form.cpf) form.cpf.value = userData.dadosPessoais.cpf || '';
+            if (form.dataNascimentoTitular) form.dataNascimentoTitular.value = userData.dadosPessoais.dataNascimentoTitular || '';
+            if (form.endereco) form.endereco.value = userData.dadosPessoais.endereco || '';
+        }
+
+        // Preencher Dependentes
+        if (userData.dependentes) {
+            if (form.nomeDependente1) form.nomeDependente1.value = userData.dependentes.nomeDependente1 || '';
+            if (form.grauParentesco) form.grauParentesco.value = userData.dependentes.grauParentesco || '';
+            if (form.telefone) form.telefone.value = userData.dependentes.telefone || '';
+            if (form.dataNascimento) form.dataNascimento.value = userData.dependentes.dataNascimento || '';
+            if (form.outrosDependentes) form.outrosDependentes.value = userData.dependentes.outrosDependentes || '';
+        }
+
+        // Preencher Animais
+        if (userData.animais) {
+            const possui = userData.animais.possuiAnimal || 'Não';
+            const radio = form.querySelector(`input[name="possuiAnimal"][value="${possui}"]`);
+            if (radio) radio.checked = true;
+            
+            const animalFields = document.getElementById('animalFields');
+            if (possui === 'Sim') {
+                if (animalFields) animalFields.style.display = 'block';
+                if (form.especie) form.especie.value = userData.animais.especie || '';
+                if (form.nomeAnimal) form.nomeAnimal.value = userData.animais.nomeAnimal || '';
+                if (form.vacinacao) form.vacinacao.value = userData.animais.vacinacao || '';
+            } else {
+                if (animalFields) animalFields.style.display = 'none';
+            }
+        }
+        
+        // Termos (Marcar todos por padrão if vnt_user_data exists)
+        const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(cb => cb.checked = true);
+
+        // Definir dados para o gerador de PDF
+        window.lastSubmittedData = userData;
+
+    } catch (e) {
+        console.error("Erro ao preencher cadastro:", e);
+    }
+};
+
+// Executa após carregar se já estiver na aba de cadastro
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.querySelector('.nav-item.active[data-target="cadastro"]')) {
+        window.preencherMeuCadastro();
+    }
+});
