@@ -643,11 +643,20 @@ async function renderMoradores() {
         moradores = JSON.parse(localStorage.getItem('vnt_moradores')) || [];
     }
 
-    // Create a dict index mapped by "endereco"
-    let mapMoradores = {};
-    // Last overrides previous (simulates update)
+    // Filtra entradas inválidas e moradores de sistema
+    moradores = moradores.filter(m => m && m.dadosPessoais && m.dadosPessoais.nip && m.dadosPessoais.nip !== 'sindico' && m.dadosPessoais.nip !== 'sistema');
+
+    // Normaliza o campo de endereço: aceita 'endereco' (form interno) ou 'enderecoPnr' (form externo)
     moradores.forEach(m => {
-        mapMoradores[m.dadosPessoais.endereco] = m;
+        if (!m.dadosPessoais.endereco && m.dadosPessoais.enderecoPnr) {
+            m.dadosPessoais.endereco = m.dadosPessoais.enderecoPnr;
+        }
+    });
+
+    // Create a dict index mapped by "endereco" (último sobrescreve — simula update)
+    let mapMoradores = {};
+    moradores.forEach(m => {
+        if (m.dadosPessoais.endereco) mapMoradores[m.dadosPessoais.endereco] = m;
     });
 
     let ocupadoCount = 0;
@@ -670,8 +679,8 @@ async function renderMoradores() {
         if (mapMoradores[pnr]) {
             ocupadoCount++;
             let data = mapMoradores[pnr];
-            let dependentes = data.dependentes.nomeDependente1 !== 'Não informado' ? 'Cadastrado' : 'S/ Dep';
-            let pets = data.animais.possuiAnimal === 'Sim' ? data.animais.especie : 'S/ Pet';
+            let dependentes = (data.dependentes && data.dependentes.nomeDependente1 && data.dependentes.nomeDependente1 !== 'Não informado') ? 'Cadastrado' : 'S/ Dep';
+            let pets = (data.animais && data.animais.possuiAnimal === 'Sim') ? (data.animais.especie || data.animais.especieAnimal || '?') : 'S/ Pet';
 
             html += `
             <div class="pnr-card ocupado" style="position:relative;">
@@ -700,12 +709,13 @@ async function renderMoradores() {
     pnrGrid.innerHTML = html;
 
     let btnOcupado = document.getElementById('badgeOcupado');
-    let btnVago = document.getElementById('badgeOcupado');
+    let btnVago = document.getElementById('badgeVago');
     if (btnOcupado) btnOcupado.innerText = 'Ocupado: ' + ocupadoCount;
     if (btnVago) btnVago.innerText = 'Vago (Taxa União): ' + vagoCount;
     
-    // Tabela Administrativa em Lista Detalhada
-    const tbLista = document.getElementById('listaMoradoresAdmin');
+    // Tabela Administrativa em Lista Detalhada (id correto: listaMoradoresBody)
+    window._moradoresCache = moradores; // cache para uso na busca
+    const tbLista = document.getElementById('listaMoradoresBody');
     if (tbLista) {
         let sortedMoradores = [...moradores].sort((a,b) => {
              let statusA = a.statusVerificacao || 'Pendente';
@@ -714,39 +724,66 @@ async function renderMoradores() {
              return statusA === 'Pendente' ? -1 : 1;
         });
         
-        let tbHtml = sortedMoradores.map(m => {
-            if (!m || !m.dadosPessoais || !m.dadosPessoais.nip) return '';
-            const nipStr = m.dadosPessoais.nip;
-            if (nipStr === 'sindico' || nipStr === 'sistema') return '';
-            
-            const status = m.statusVerificacao || 'Pendente';
-            const statusBadge = status === 'Verificado' 
-                ? '<span class="badge" style="background:#c6f6d5; color:#22543d; border: 1px solid #9ae6b4;"><i class="ri-verified-badge-fill"></i> Verificado</span>'
-                : '<span class="badge" style="background:#fefcbf; color:#975a16; border: 1px solid #faf089;"><i class="ri-error-warning-fill"></i> Pendente</span>';
+        window._renderListaMoradores = function(lista) {
+            let tbHtml = lista.map(m => {
+                if (!m || !m.dadosPessoais || !m.dadosPessoais.nip) return '';
+                const nipStr = m.dadosPessoais.nip;
                 
-            let strAction = '';
-            if (status !== 'Verificado') {
-                 strAction += `<button class="btn btn-sm btn-outline" title="Autenticar Cadastro" onclick="autenticarMorador('${nipStr}')"><i class="ri-check-double-line" style="color:#38a169;"></i></button> `;
-            }
-            strAction += `<button class="btn btn-sm btn-outline" title="Editar" onclick="abrirModalEditarMorador('${nipStr}')"><i class="ri-pencil-line" style="color:#3182ce;"></i></button> `;
-            strAction += `<button class="btn btn-sm btn-outline" title="Apagar" onclick="apagarMorador('${nipStr}')"><i class="ri-delete-bin-line" style="color:#e53e3e;"></i></button>`;
+                const status = m.statusVerificacao || 'Pendente';
+                const statusBadge = status === 'Verificado' 
+                    ? '<span class="badge" style="background:#c6f6d5; color:#22543d; border: 1px solid #9ae6b4;"><i class="ri-verified-badge-fill"></i> Verificado</span>'
+                    : '<span class="badge" style="background:#fefcbf; color:#975a16; border: 1px solid #faf089;"><i class="ri-error-warning-fill"></i> Pendente</span>';
+                    
+                const pets = (m.animais && m.animais.possuiAnimal === 'Sim') ? (m.animais.especie || m.animais.especieAnimal || '?') : 'Não';
+                    
+                let strAction = '';
+                if (status !== 'Verificado') {
+                     strAction += `<button class="btn btn-sm btn-outline" title="Autenticar Cadastro" onclick="autenticarMorador('${nipStr}')"><i class="ri-check-double-line" style="color:#38a169;"></i></button> `;
+                }
+                strAction += `<button class="btn btn-sm btn-outline" title="Editar" onclick="abrirModalEditarMorador('${nipStr}')"><i class="ri-pencil-line" style="color:#3182ce;"></i></button> `;
+                strAction += `<button class="btn btn-sm btn-outline" title="Apagar" onclick="apagarMorador('${nipStr}')"><i class="ri-delete-bin-line" style="color:#e53e3e;"></i></button>`;
 
-            return `
-            <tr style="border-bottom: 1px solid rgba(0,0,0,0.05); transition: background 0.2s;">
-                <td style="padding: 12px; font-family: monospace; font-size: 1.1em; color: var(--primary);">${nipStr}</td>
-                <td style="padding: 12px;"><strong>${m.dadosPessoais.posto}</strong> ${m.dadosPessoais.nomeCompleto}</td>
-                <td style="padding: 12px;">${m.dadosPessoais.endereco || m.dadosPessoais.enderecoPnr}</td>
-                <td style="padding: 12px;">${statusBadge}</td>
-                <td style="padding: 12px; text-align: right; white-space: nowrap;">${strAction}</td>
-            </tr>
-            `;
-        }).join('');
+                return `
+                <tr style="border-bottom: 1px solid rgba(0,0,0,0.05); transition: background 0.2s;">
+                    <td style="padding: 12px;"><strong>${m.dadosPessoais.posto || '-'}</strong></td>
+                    <td style="padding: 12px;">${m.dadosPessoais.nomeCompleto || '-'}</td>
+                    <td style="padding: 12px; font-family: monospace; color: var(--primary);">${nipStr}</td>
+                    <td style="padding: 12px;">${m.dadosPessoais.endereco || '-'}</td>
+                    <td style="padding: 12px;">${pets}</td>
+                    <td style="padding: 12px;">${statusBadge}</td>
+                    <td style="padding: 12px; text-align: right; white-space: nowrap;">${strAction}</td>
+                </tr>
+                `;
+            }).join('');
+            
+            if (!tbHtml.trim()) tbHtml = '<tr><td colspan="7" style="text-align:center; padding: 20px; color:#a0aec0;">Nenhum morador cadastrado ainda.</td></tr>';
+            tbLista.innerHTML = tbHtml;
+        };
         
-        if (!tbHtml) tbHtml = '<tr><td colspan="5" style="text-align:center; padding: 20px; color:#a0aec0;">Nenhum morador cadastrado.</td></tr>';
-        
-        tbLista.innerHTML = tbHtml;
+        window._renderListaMoradores(sortedMoradores);
     }
 }
+
+// Função de busca chamada pelo dashboard HTML
+window.filtrarListaMoradores = function() {
+    const termo = (document.getElementById('buscaMorador')?.value || '').toLowerCase().trim();
+    const fonte = window._moradoresCache || [];
+    if (!termo) {
+        if (window._renderListaMoradores) window._renderListaMoradores(fonte);
+        return;
+    }
+    const filtrados = fonte.filter(m => {
+        if (!m || !m.dadosPessoais) return false;
+        const dp = m.dadosPessoais;
+        return (
+            (dp.nomeCompleto || '').toLowerCase().includes(termo) ||
+            (dp.nip || '').toLowerCase().includes(termo) ||
+            (dp.endereco || '').toLowerCase().includes(termo) ||
+            (dp.posto || '').toLowerCase().includes(termo)
+        );
+    });
+    if (window._renderListaMoradores) window._renderListaMoradores(filtrados);
+};
 
 setTimeout(renderMoradores, 500);
 
