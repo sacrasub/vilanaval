@@ -638,17 +638,24 @@ async function renderMoradores() {
     let moradores = [];
     if (_supabase) {
         let { data } = await _supabase.from('moradores').select('dados');
-        if (data) moradores = data.map(d => d.dados);
+        // d.dados pode ser null para registros de sistema — filtra antes de usar
+        if (data) moradores = data.map(d => d?.dados).filter(Boolean);
     } else {
         moradores = JSON.parse(localStorage.getItem('vnt_moradores')) || [];
     }
 
-    // Filtra entradas inválidas e moradores de sistema
-    moradores = moradores.filter(m => m && m.dadosPessoais && m.dadosPessoais.nip && m.dadosPessoais.nip !== 'sindico' && m.dadosPessoais.nip !== 'sistema');
+    // Filtra entradas inválidas e moradores de sistema (com optional chaining seguro)
+    moradores = moradores.filter(m =>
+        m != null &&
+        m.dadosPessoais != null &&
+        m.dadosPessoais.nip &&
+        m.dadosPessoais.nip !== 'sindico' &&
+        m.dadosPessoais.nip !== 'sistema'
+    );
 
     // Normaliza o campo de endereço: aceita 'endereco' (form interno) ou 'enderecoPnr' (form externo)
     moradores.forEach(m => {
-        if (!m.dadosPessoais.endereco && m.dadosPessoais.enderecoPnr) {
+        if (!m.dadosPessoais?.endereco && m.dadosPessoais?.enderecoPnr) {
             m.dadosPessoais.endereco = m.dadosPessoais.enderecoPnr;
         }
     });
@@ -656,7 +663,8 @@ async function renderMoradores() {
     // Create a dict index mapped by "endereco" (último sobrescreve — simula update)
     let mapMoradores = {};
     moradores.forEach(m => {
-        if (m.dadosPessoais.endereco) mapMoradores[m.dadosPessoais.endereco] = m;
+        const end = m.dadosPessoais?.endereco;
+        if (end) mapMoradores[end] = m;
     });
 
     let ocupadoCount = 0;
